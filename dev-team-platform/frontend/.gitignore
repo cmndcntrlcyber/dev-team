@@ -1,0 +1,119 @@
+# ============================================================================
+# Next.js Frontend - Specific .gitignore
+# ============================================================================
+# This .gitignore is specific to the Next.js frontend service
+
+# ============================================================================
+# NEXT.JS SPECIFIC FILES
+# ============================================================================
+# Next.js build output
+.next/
+out/
+
+# Next.js cache
+.next/cache/
+
+# Vercel deployment
+.vercel/
+
+# Static files and build artifacts
+/public/sitemap.xml
+/public/robots.txt
+/public/sw.js
+/public/workbox-*.js
+
+# ============================================================================
+# ENVIRONMENT AND CONFIGURATION
+# ============================================================================
+# Environment files (inherits from root .gitignore but explicit here)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Local configuration overrides
+next.config.local.js
+next.config.override.js
+
+# ============================================================================
+# DEPENDENCIES AND BUILD
+# ============================================================================
+# Dependencies (covered by root but explicit)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# ============================================================================
+# STYLING AND ASSETS
+# ============================================================================
+# Tailwind CSS generated files
+/styles/generated/
+/public/css/generated/
+
+# PostCSS cache
+.postcssrc.cache
+
+# Sass cache
+.sass-cache/
+*.css.map
+*.scss.map
+
+# ============================================================================
+# TESTING
+# ============================================================================
+# Test results
+coverage/
+.nyc_output/
+/cypress/videos/
+/cypress/screenshots/
+/playwright-report/
+/test-results/
+
+# Jest cache
+.jest/
+
+# ============================================================================
+# IDE AND DEVELOPMENT
+# ============================================================================
+# VSCode settings (allow some, ignore others)
+.vscode/settings.json
+.vscode/launch.json
+.vscode/*.code-snippets
+
+# WebStorm/IntelliJ
+.idea/
+
+# ============================================================================
+# TEMPORARY AND CACHE FILES
+# ============================================================================
+# Cache directories
+.cache/
+.tmp/
+tmp/
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# ============================================================================
+# DEPLOYMENT AND PRODUCTION
+# ============================================================================
+# Deployment specific files
+/public/storybook-static/
+
+# Bundle analyzer
+/.bundle-analyzer/
+
+# Lighthouse reports
+/lighthouse-reports/

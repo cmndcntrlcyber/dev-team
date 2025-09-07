@@ -1,0 +1,55 @@
+{
+  "routes": [
+    {
+      "path": "/api/projects/*",
+      "service": "project-service",
+      "host": "http://project-service:3002",
+      "methods": ["GET", "POST", "PUT", "DELETE", "PATCH"],
+      "auth": true,
+      "rateLimit": 100,
+      "timeout": 10000
+    },
+    {
+      "path": "/api/tasks/*",
+      "service": "task-service", 
+      "host": "http://task-service:3003",
+      "methods": ["GET", "POST", "PUT", "DELETE", "PATCH"],
+      "auth": true,
+      "rateLimit": 200,
+      "timeout": 10000
+    },
+    {
+      "path": "/api/agents/*",
+      "service": "orchestrator-service",
+      "host": "http://orchestrator-service:3001",
+      "methods": ["GET", "POST", "PUT", "DELETE"],
+      "auth": true,
+      "rateLimit": 50,
+      "timeout": 30000
+    },
+    {
+      "path": "/api/auth/*",
+      "service": "auth-service",
+      "host": "http://auth-service:3004",
+      "methods": ["GET", "POST", "PUT", "DELETE"],
+      "auth": false,
+      "rateLimit": 20,
+      "timeout": 5000
+    },
+    {
+      "path": "/ws",
+      "service": "orchestrator-service",
+      "host": "ws://orchestrator-service:3001",
+      "methods": ["GET"],
+      "auth": true,
+      "websocket": true
+    }
+  ],
+  "publicPaths": [
+    "/health",
+    "/metrics",
+    "/api/auth/login",
+    "/api/auth/register",
+    "/api/auth/refresh"
+  ]
+}

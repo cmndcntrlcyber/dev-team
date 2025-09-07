@@ -1,0 +1,261 @@
+# ============================================================================
+# Backend Services - Generic .gitignore
+# ============================================================================
+# This .gitignore applies to all microservices in the services/ directory
+# Individual services can have their own .gitignore for service-specific patterns
+
+# ============================================================================
+# ENVIRONMENT FILES AND SECRETS (CRITICAL)
+# ============================================================================
+# Environment configuration files
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+
+# Service-specific config files that may contain secrets
+config/local.json
+config/development.json
+config/production.json
+config/secrets.json
+config/database.json
+config/redis.json
+
+# JWT and authentication secrets
+*.jwt
+jwt-*.key
+auth-config.json
+
+# Database connection files
+database.config.js
+db-config.json
+connection-string.txt
+
+# ============================================================================
+# NODE.JS AND BUILD ARTIFACTS
+# ============================================================================
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Build outputs
+dist/
+build/
+out/
+lib/
+*.tsbuildinfo
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# ============================================================================
+# MICROSERVICE SPECIFIC PATTERNS
+# ============================================================================
+# Generated OpenAPI/Swagger docs that might contain sensitive examples
+docs/generated/
+swagger-output.json
+openapi-*.json
+api-docs/generated/
+
+# Generated protobuf files
+*.pb.js
+*.pb.ts
+*_pb.js
+*_pb.ts
+
+# GraphQL generated schema files
+schema-generated.graphql
+generated-schema/
+
+# ============================================================================
+# DATABASE AND CACHE
+# ============================================================================
+# SQLite databases (for local development)
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+
+# Database migration tracking (if sensitive)
+migrations/applied/
+migration-state.json
+
+# Redis dumps
+dump.rdb
+appendonly.aof
+
+# ============================================================================
+# TESTING AND COVERAGE
+# ============================================================================
+# Test results
+coverage/
+.nyc_output/
+test-results/
+test-reports/
+junit.xml
+
+# Jest cache
+.jest/
+
+# Mocha/Chai test artifacts
+mochawesome-report/
+
+# ============================================================================
+# SECURITY AND MONITORING
+# ============================================================================
+# Security scan results
+.snyk
+security-scan-results/
+vulnerability-reports/
+
+# Performance monitoring files
+performance-*.log
+metrics-*.json
+profiling-data/
+heap-snapshots/
+
+# Application monitoring
+newrelic.log
+newrelic_agent.log
+
+# ============================================================================
+# CONTAINERIZATION
+# ============================================================================
+# Docker override files
+docker-compose.override.yml
+docker-compose.local.yml
+Dockerfile.local
+.dockerignore.local
+
+# Container build artifacts
+.docker/
+docker-build/
+
+# ============================================================================
+# SERVICE MESH AND DEPLOYMENT
+# ============================================================================
+# Istio configuration with secrets
+istio/secrets/
+service-mesh-config/
+
+# Deployment manifests with secrets
+k8s/secrets/
+kubernetes/local/
+helm/values-local.yaml
+helm/values-dev.yaml
+
+# Terraform service-specific files
+terraform.tfvars
+*.auto.tfvars
+.terraform/
+*.tfstate*
+
+# ============================================================================
+# MESSAGE QUEUES AND EVENT STREAMING
+# ============================================================================
+# RabbitMQ data
+rabbitmq-data/
+
+# Apache Kafka data
+kafka-logs/
+kafka-data/
+
+# NATS server data
+nats-data/
+
+# ============================================================================
+# TEMPORARY AND DEVELOPMENT FILES
+# ============================================================================
+# Temporary files
+tmp/
+temp/
+.tmp/
+*.tmp
+*.temp
+
+# Development data and fixtures
+dev-data/
+test-fixtures/local/
+sample-data/local/
+
+# Mock data with potentially sensitive info
+mocks/local/
+fixtures/with-secrets/
+
+# ============================================================================
+# IDE AND EDITOR
+# ============================================================================
+# VSCode service-specific settings
+.vscode/settings.json
+.vscode/launch.json
+
+# IntelliJ/WebStorm
+.idea/
+*.iml
+
+# ============================================================================
+# GENERATED SERVICE FILES
+# ============================================================================
+# Auto-generated client libraries
+clients/generated/
+sdk/generated/
+
+# Generated service discovery files
+service-registry-local.json
+consul-config.json
+
+# Auto-generated API documentation
+api-spec/generated/
+
+# ============================================================================
+# BACKUP AND RECOVERY
+# ============================================================================
+# Service data backups
+backups/
+*.backup
+*.bak
+
+# Configuration backups
+config-backup/
+settings-backup/
+
+# ============================================================================
+# OS AND SYSTEM FILES
+# ============================================================================
+# OS generated files
+.DS_Store
+Thumbs.db
+*~
+
+# System files
+.directory
+.fuse_hidden*
+
+# ============================================================================
+# END OF SERVICES .GITIGNORE
+# ============================================================================
+
+# Note: This .gitignore protects backend services from:
+# 1. Environment variables and service secrets
+# 2. Database connections and authentication tokens
+# 3. Build artifacts and dependencies
+# 4. Test results and coverage reports
+# 5. Security scan results and monitoring data
+# 6. Container and deployment configurations
+# 7. Message queue and event streaming data
+# 8. Generated API documentation and client libraries
