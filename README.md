@@ -1,433 +1,515 @@
 # Dev Team Platform
 
-**AI-Powered Multi-Agent Development Team - Microservices Architecture**
+**AI-Powered Multi-Agent Development Platform**
 
-A comprehensive platform that coordinates specialized AI agents to build, test, and deploy your projects with intelligent collaboration and human oversight. This microservices-based system provides a web dashboard for development teams to manage projects and tasks efficiently.
+A comprehensive platform that coordinates specialized AI agents to build, test, and deploy your projects with intelligent collaboration and human oversight. Built as a modern single-application architecture with integrated agent orchestration.
 
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![Node.js](https://img.shields.io/badge/runtime-node.js-green)](https://nodejs.org)
 [![Docker](https://img.shields.io/badge/docker-ready-blue)](https://docker.com)
-[![Microservices](https://img.shields.io/badge/architecture-microservices-green)](https://microservices.io)
 
 ## 🌟 Overview
 
-The Dev Team Platform transforms AI-powered development collaboration into a scalable, web-based microservices architecture. Originally conceived as a VS Code extension, it has evolved into a standalone platform that any development team can deploy and use through a modern web interface.
+The Dev Team Platform is an AI-powered development assistant that coordinates specialized agents to help teams build applications efficiently. The platform features a modern React-based dashboard with real-time agent monitoring and intelligent task distribution.
 
 ### 🏗️ **Architecture**
 
-- **Frontend Dashboard**: React-based project and task management interface
-- **API Gateway**: Authentication, routing, and rate limiting (Port 3000)
-- **Core Services**: Orchestrator, Project Management, Task Management
-- **Agent Services**: 6 specialized AI agents as individual microservices
-- **Infrastructure**: PostgreSQL, Redis, NATS messaging for scalability
+- **Single Application**: Integrated Express.js server on port 5000
+- **Frontend**: React 18 with TypeScript and Tailwind CSS
+- **Backend**: Express.js with REST API endpoints
+- **Database**: PostgreSQL for data persistence
+- **Agent System**: 6 specialized AI agents with health monitoring and mock mode
 
 ## ✨ Features
 
-### 🤖 **6 Specialized AI Agent Services**
-- **Architecture Agent** (Port 3010): Project coordination, technology decisions, quality oversight
-- **Frontend Agent** (Port 3011): React/Vue/Angular components, routing, state management
-- **Backend Agent** (Port 3012): APIs, databases, authentication, microservices
-- **QA Agent** (Port 3013): Automated testing, code quality, security scanning
-- **DevOps Agent** (Port 3014): CI/CD pipelines, containerization, cloud deployment
-- **MCP Agent** (Port 3015): Model Context Protocol servers, external integrations
+### 🤖 **6 Specialized AI Agents**
+- **Architecture Lead**: Project coordination, technology decisions, system design
+- **Frontend Core**: React/Vue/Angular components, UI/UX development
+- **Backend Integration**: APIs, databases, authentication, server-side logic
+- **Quality Assurance**: Testing strategies, code quality, security validation
+- **DevOps Engineer**: CI/CD pipelines, containerization, deployment automation
+- **MCP Integration**: Model Context Protocol servers, external integrations
 
 ### 🧠 **Intelligent Coordination**
-- **Smart Task Distribution**: AI-powered assignment based on agent capabilities and workload
-- **Web-Based Human Feedback**: Decision points with intuitive web interface
-- **Real-time Progress Monitoring**: Live project analytics and predictions
-- **Quality Gates**: Automated quality validation before deployment
-- **Dependency Management**: Critical path analysis and blocker resolution
+- **Real-time Monitoring**: Live agent status and health checks
+- **Mock Development Mode**: Full functionality without external dependencies
+- **Task Distribution**: AI-powered assignment based on agent capabilities
+- **Web Dashboard**: Intuitive interface for project and agent management
+- **Performance Metrics**: CPU, memory, and response time monitoring
 
 ### 🚀 **Production Ready**
-- **Containerized Deployment**: Complete Docker and Docker Compose setup
-- **Scalable Architecture**: Each agent runs as an independent microservice
-- **API-First Design**: RESTful APIs for easy integration with existing tools
-- **Team Collaboration**: Multi-user support with role-based access control
-- **Performance Monitoring**: Built-in logging, metrics, and health checks
+- **Single Port Deployment**: Everything runs on port 5000
+- **Database Agnostic**: Connect to any PostgreSQL instance
+- **Session Management**: Secure authentication and user sessions
+- **Real-time Updates**: Live agent status and task progress
+- **Auto-Recovery**: Automatic agent reconnection and error handling
 
-## 📦 Quick Start
+## 📦 Deployment Options
 
-### Prerequisites
-- **Docker & Docker Compose**: Latest versions
-- **Node.js**: Version 18.0 or higher (for development)
-- **API Keys**: Anthropic Claude (required for AI agents)
+### 🐳 **Docker Deployment**
 
-### 🚀 **Deploy with Docker**
+Deploy using Docker for any container orchestration platform:
+
 ```bash
 # Clone the repository
-git clone https://github.com/cmndcntrlcyber/dev-team.git
-cd dev-team/dev-team-platform
+git clone https://github.com/your-username/dev-team-platform.git
+cd dev-team-platform
 
-# Configure environment
-cp .env.example .env
-# Edit .env with your API keys
+# Build Docker image
+docker build -t dev-team-platform .
 
-# Start all services
-docker-compose up -d
+# Run container with environment variables
+docker run -d \
+  -p 5000:5000 \
+  -e DATABASE_URL="postgresql://user:password@host:port/database" \
+  -e ANTHROPIC_API_KEY="your-anthropic-key" \
+  -e SESSION_SECRET="your-secure-session-secret" \
+  --name dev-team \
+  dev-team-platform
 
 # Access the platform
-open http://localhost:3000
+open http://localhost:5000
 ```
 
-### 🔧 **Development Setup**
+#### Docker Compose Example:
+```yaml
+version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      DATABASE_URL: postgresql://user:password@postgres:5432/devteam
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      SESSION_SECRET: ${SESSION_SECRET}
+    depends_on:
+      - postgres
+  
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: devteam
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+```
+
+### 💻 **Local Development**
+
+Run locally for development and testing:
+
 ```bash
-# Install dependencies for all services
-npm run install:all
+# Clone the repository
+git clone https://github.com/your-username/dev-team-platform.git
+cd dev-team-platform
 
-# Start in development mode
-npm run dev:all
+# Install dependencies
+npm install
 
-# Or start services individually
-npm run dev:frontend
-npm run dev:gateway
-npm run dev:orchestrator
+# Set up environment variables
+cp .env.example .env
+# Edit .env with your configuration
+
+# Start development server with hot reload
+npm run dev
+
+# Access the platform
+open http://localhost:5000
 ```
 
-## 🌐 **Service Architecture**
+#### Development Features:
+- Hot module replacement for instant updates
+- Mock agent mode for testing without API keys
+- Detailed logging and debugging output
+- Automatic TypeScript compilation
 
-### **Core Services**
-```yaml
-api-gateway:        # Port 3000 - Main entry point
-orchestrator:       # Port 3001 - Agent coordination
-project-service:    # Port 3002 - Project & file management
-task-service:       # Port 3003 - Task assignment & tracking
-auth-service:       # Port 3004 - Authentication & authorization
+### 🖥️ **Self-Hosted Deployment**
+
+Deploy on VPS, dedicated servers, or bare metal:
+
+```bash
+# On your server
+# Clone the repository
+git clone https://github.com/your-username/dev-team-platform.git
+cd dev-team-platform
+
+# Install production dependencies only
+npm install --production
+
+# Build the application
+npm run build
+
+# Set environment variables
+export DATABASE_URL="postgresql://user:password@localhost:5432/devteam"
+export ANTHROPIC_API_KEY="your-anthropic-key"
+export SESSION_SECRET="your-secure-session-secret"
+export NODE_ENV="production"
+export PORT=5000
+
+# Start the production server
+npm start
+
+# Or use PM2 for process management
+npm install -g pm2
+pm2 start npm --name "dev-team" -- start
+pm2 save
+pm2 startup
 ```
 
-### **Agent Services**
-```yaml
-agent-architecture: # Port 3010 - Technical leadership
-agent-frontend:     # Port 3011 - UI/UX development
-agent-backend:      # Port 3012 - Server-side development
-agent-qa:          # Port 3013 - Quality assurance
-agent-devops:      # Port 3014 - Infrastructure & deployment
-agent-mcp:         # Port 3015 - External integrations
+#### System Requirements:
+- Node.js 18.0 or higher
+- PostgreSQL 13 or higher
+- 2GB RAM minimum (4GB recommended)
+- 10GB disk space
+
+#### Nginx Reverse Proxy Configuration:
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com;
+
+    location / {
+        proxy_pass http://localhost:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
 ```
 
-### **Infrastructure**
-```yaml
-postgres:          # Port 5432 - Primary database
-redis:             # Port 6379 - Caching & sessions
-nats:              # Port 4222 - Inter-service messaging
+## ⚙️ Configuration
+
+### **Environment Variables**
+
+Create a `.env` file with the following configuration:
+
+```bash
+# Database Configuration (Required)
+DATABASE_URL=postgresql://user:password@localhost:5432/devteam
+
+# AI Integration (Optional - runs in mock mode without these)
+ANTHROPIC_API_KEY=your-anthropic-key
+OPENAI_API_KEY=your-openai-key
+
+# Server Configuration
+PORT=5000
+NODE_ENV=production
+SESSION_SECRET=your-secure-session-secret-min-32-chars
+
+# Authentication (Optional)
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+
+# Agent Configuration (Optional)
+AGENT_HEALTH_CHECK_INTERVAL=10000  # milliseconds
+AGENT_MAX_RECONNECT_ATTEMPTS=5
+AGENT_RECONNECT_DELAY=5000         # milliseconds
+AGENT_TIMEOUT=60000                 # milliseconds
+
+# Custom Agent Endpoints (Optional - for external agent containers)
+ARCHITECTURE_AGENT_URL=http://localhost:3010
+FRONTEND_AGENT_URL=http://localhost:3011
+BACKEND_AGENT_URL=http://localhost:3012
+QA_AGENT_URL=http://localhost:3013
+DEVOPS_AGENT_URL=http://localhost:3014
+MCP_AGENT_URL=http://localhost:3015
 ```
 
-## 📊 **Platform Dashboard**
+### **Database Setup**
 
-### **Project Management**
-- **Project Overview**: Create, manage, and monitor development projects
-- **File Management**: Version control integration and file organization
-- **Template System**: Pre-configured project templates for common stacks
-- **Team Collaboration**: Multi-user workspace with role-based permissions
+```sql
+-- Create database
+CREATE DATABASE devteam;
 
-### **Task Coordination**
-- **Intelligent Assignment**: AI analyzes requirements and assigns to optimal agents
-- **Visual Kanban Board**: Drag-and-drop task management interface
-- **Dependency Tracking**: Automatic detection and visualization of task dependencies
-- **Progress Analytics**: Real-time metrics and completion forecasting
+-- Grant privileges
+GRANT ALL PRIVILEGES ON DATABASE devteam TO your_user;
+```
 
-### **Agent Monitoring**
-- **Live Agent Status**: Monitor health and performance of all agent services
-- **Task Distribution**: View current workload across agents
-- **Performance Metrics**: Response times, success rates, and resource usage
-- **Quality Metrics**: Code quality scores, test coverage, and security ratings
+The application will automatically run migrations on startup.
 
-## 🤖 **Agent Capabilities**
+## 🏗️ System Architecture
 
-### **Architecture Agent** (Port 3010)
-```typescript
-// Project leadership and technical coordination
+### **Application Structure**
+```
+┌────────────────────────────────────┐
+│      Dev Team Platform             │
+│         (Port 5000)                │
+├────────────────────────────────────┤
+│    Express.js Server               │
+│    ├── REST API                    │
+│    ├── Static File Serving         │
+│    └── WebSocket Support           │
+├────────────────────────────────────┤
+│    React Frontend (SPA)            │
+│    ├── Dashboard UI                │
+│    ├── Agent Monitoring            │
+│    └── Project Management          │
+├────────────────────────────────────┤
+│    Agent Connector Service         │
+│    ├── 6 AI Agents                 │
+│    ├── Health Monitoring           │
+│    └── Mock/Real Mode Toggle       │
+├────────────────────────────────────┤
+│    PostgreSQL Database             │
+│    ├── User Management             │
+│    ├── Project Storage             │
+│    └── Session Store               │
+└────────────────────────────────────┘
+```
+
+### **Agent System Architecture**
+- **Integrated Connector**: Single service managing all agents
+- **Health Monitoring**: Automatic health checks every 10 seconds
+- **Mock Mode**: Development mode without external dependencies
+- **Real Mode**: Production mode with AI service connections
+- **Auto-Recovery**: Automatic reconnection on failure
+
+## 🤖 Agent Capabilities
+
+### **Architecture Lead**
+- Project planning and technical coordination
 - Technology stack analysis and recommendations
 - System architecture design and validation
 - Code review and quality oversight
-- Project timeline management and risk assessment
-- Integration coordination between other agents
-```
+- Integration coordination between agents
 
-### **Frontend Agent** (Port 3011)
-```typescript
-// Modern UI/UX development
-- React/Vue/Angular/Svelte component generation
+### **Frontend Core**
+- Modern UI/UX development with React/Vue/Angular
 - Responsive design with Tailwind CSS/Material-UI
 - State management (Redux, Zustand, Context API)
-- API integration and data fetching patterns
-- Accessibility compliance and performance optimization
-```
+- API integration and data fetching
+- Performance optimization and accessibility
 
-### **Backend Agent** (Port 3012)
-```typescript
-// Server-side and API development
-- Express.js/FastAPI/NestJS server setup
+### **Backend Integration**
+- Server-side development with Express/FastAPI/NestJS
 - Database schema design and migrations
 - Authentication systems (JWT, OAuth, RBAC)
-- API documentation (OpenAPI/Swagger)
-- Microservices architecture implementation
-```
+- API documentation and testing
+- Microservices architecture when needed
 
-### **QA Agent** (Port 3013)
-```typescript
-// Comprehensive quality assurance
+### **Quality Assurance**
 - Unit, integration, and E2E test generation
-- Code quality analysis (ESLint, Prettier, SonarQube)
-- Security vulnerability scanning (OWASP)
+- Code quality analysis and standards enforcement
+- Security vulnerability scanning
 - Performance testing and benchmarking
-- Accessibility validation (WCAG compliance)
-```
+- Accessibility validation
 
-### **DevOps Agent** (Port 3014)
-```typescript
-// Infrastructure and deployment automation
-- CI/CD pipeline creation (GitHub Actions, GitLab CI)
-- Docker containerization and optimization
-- Kubernetes orchestration and scaling
-- Cloud infrastructure (AWS/GCP/Azure)
-- Monitoring, logging, and alerting setup
-```
+### **DevOps Engineer**
+- CI/CD pipeline creation and management
+- Docker containerization
+- Infrastructure as code
+- Monitoring and logging setup
+- Deployment automation
 
-### **MCP Agent** (Port 3015)
-```typescript
-// External system integration
+### **MCP Integration**
 - Model Context Protocol server development
-- Custom tool and resource creation
-- Third-party API integration (GitHub, OpenAI, databases)
-- Plugin architecture development
-- Documentation generation and client setup
-```
+- External API integration
+- Custom tool creation
+- Plugin architecture
+- Documentation generation
 
-## 🔄 **Development Workflow**
+## 📊 Dashboard Features
 
-### 1. **Project Initialization**
-```mermaid
-graph LR
-    A[Create Project] --> B[Architecture Analysis]
-    B --> C[Agent Assignment]
-    C --> D[Parallel Development]
-    D --> E[Quality Gates]
-    E --> F[Integration & Deployment]
-```
+### **Agent Monitoring**
+- Real-time agent status (Ready/Mock/Offline)
+- Performance metrics visualization
+- Health check history
+- Task assignment tracking
+- Error logs and debugging
 
-### 2. **Intelligent Task Distribution**
-- **Capability Analysis**: System analyzes each agent's current workload and expertise
-- **Dependency Resolution**: Automatic detection and ordering of interdependent tasks
-- **Load Balancing**: Dynamic distribution to prevent bottlenecks
-- **Human Oversight**: Critical decisions escalated to team leads through web interface
+### **Project Management**
+- Create and organize projects
+- File upload and management
+- Task creation and assignment
+- Progress tracking
+- Team collaboration
 
-### 3. **Quality Assurance Pipeline**
-- **Continuous Testing**: Automated unit, integration, and E2E tests
-- **Code Quality Gates**: Configurable quality thresholds for deployment
-- **Security Scanning**: OWASP Top 10 and dependency vulnerability checks
-- **Performance Validation**: Response time and resource usage monitoring
+### **System Administration**
+- User authentication management
+- System configuration
+- API key management
+- Performance monitoring
+- Activity logs
 
-## ⚙️ **Configuration**
+## 🔄 Development Workflow
 
-### **Environment Variables**
+### **Getting Started**
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Configure environment variables
+4. Set up PostgreSQL database
+5. Run development server: `npm run dev`
+
+### **Agent Development Mode**
+The platform automatically handles agent connectivity:
+
+- **Mock Mode**: Simulates agent responses when API keys are not configured
+- **Real Mode**: Connects to actual AI services when configured
+- **Hybrid Mode**: Mix of real and mock agents based on availability
+- **Auto-Recovery**: Automatic mode switching on service availability
+
+### **Building for Production**
 ```bash
-# API Keys
-ANTHROPIC_API_KEY=your-anthropic-key
-TAVILY_API_KEY=your-tavily-key-optional
+# Build the application
+npm run build
 
-# Database
-DATABASE_URL=postgresql://user:password@postgres:5432/devteam
-REDIS_URL=redis://redis:6379
-
-# Services
-API_GATEWAY_PORT=3000
-ORCHESTRATOR_PORT=3001
-PROJECT_SERVICE_PORT=3002
-TASK_SERVICE_PORT=3003
-
-# Agent Configuration
-MAX_CONCURRENT_TASKS=5
-AGENT_TIMEOUT=60000
-LOG_LEVEL=info
+# Run production build
+npm start
 ```
 
-### **Agent Settings**
-```json
-{
-  "agents": {
-    "architecture": { "enabled": true, "maxConcurrentTasks": 2 },
-    "frontend": { "enabled": true, "maxConcurrentTasks": 3 },
-    "backend": { "enabled": true, "maxConcurrentTasks": 3 },
-    "qa": { "enabled": true, "maxConcurrentTasks": 4 },
-    "devops": { "enabled": true, "maxConcurrentTasks": 2 },
-    "mcp": { "enabled": true, "maxConcurrentTasks": 2 }
-  }
-}
-```
-
-### **Quality Gates**
-```json
-{
-  "qualityGates": {
-    "testCoverage": 85,
-    "codeQuality": 8.0,
-    "securityScan": true,
-    "performanceCheck": true,
-    "accessibilityValidation": true
-  }
-}
-```
-
-## 🎯 **Use Cases**
-
-### **Full-Stack Web Applications**
-- **Modern SPA Development**: React/Vue/Angular with TypeScript
-- **API Development**: RESTful and GraphQL services with comprehensive documentation
-- **Database Integration**: Schema design, migrations, and ORM configuration
-- **Authentication Systems**: Complete JWT/OAuth implementation with RBAC
-
-### **Microservices Architecture**
-- **Service Decomposition**: Intelligent breaking down of monoliths
-- **Inter-Service Communication**: Event-driven architecture with NATS
-- **API Gateway Setup**: Rate limiting, authentication, and routing
-- **Container Orchestration**: Docker and Kubernetes deployment strategies
-
-### **MCP Server Development**
-- **Custom Tool Creation**: Specialized MCP tools for any domain or workflow
-- **External API Integration**: Seamless connection to GitHub, OpenAI, databases
-- **Protocol Implementation**: Full MCP specification compliance
-- **Client Integration**: Easy connection with MCP-compatible applications
-
-### **DevOps and CI/CD**
-- **Pipeline Automation**: Complete GitHub Actions and GitLab CI workflows
-- **Infrastructure as Code**: Terraform and CloudFormation templates
-- **Monitoring Setup**: Comprehensive observability with Prometheus and Grafana
-- **Security Integration**: SAST/DAST scanning and vulnerability management
-
-## 📈 **Performance Metrics**
-
-### **Platform Performance**
-- **Service Startup**: <30 seconds for complete platform deployment
-- **Agent Response Time**: <3 seconds average across all agents
-- **Memory Usage**: Optimized container images with minimal resource footprint
-- **Throughput**: Handles 100+ concurrent tasks across agent services
-
-### **Development Velocity**
-- **Project Bootstrapping**: 10-15 minutes for complete project setup
-- **Code Generation Speed**: 60-80% faster than traditional manual development
-- **Quality Assurance**: 90%+ automated test coverage with quality gates
-- **Deployment Time**: One-command deployment to multiple environments
-
-## 🔒 **Security & Privacy**
+## 🔒 Security & Privacy
 
 ### **Data Protection**
-- **Local Deployment**: Complete control over data with on-premises deployment
-- **API Key Security**: Secure environment variable management
-- **Database Encryption**: At-rest and in-transit encryption for sensitive data
-- **Audit Logging**: Comprehensive activity tracking and compliance reporting
+- All data stored in your own PostgreSQL database
+- API keys secured in environment variables
+- Session encryption with configurable secrets
+- CSRF protection on all endpoints
 
-### **Security Features**
-- **Input Validation**: All APIs protected with comprehensive input sanitization
-- **Rate Limiting**: Configurable rate limits to prevent abuse
-- **RBAC**: Role-based access control for team collaboration
-- **Container Security**: Minimal attack surface with distroless base images
+### **Authentication**
+- Mock authentication for development
+- Google OAuth for production
+- Session-based authentication
+- Role-based access control ready
 
-## 🛠️ **Advanced Features**
+### **Best Practices**
+- Regular security updates
+- Input validation on all endpoints
+- SQL injection prevention with parameterized queries
+- XSS protection with React's built-in escaping
 
-### **Extensibility**
-- **Custom Agents**: Plugin architecture for domain-specific agents
-- **API Integration**: RESTful APIs for third-party tool integration
-- **Template System**: Configurable project templates and scaffolding
-- **Webhook Support**: Real-time notifications and external system integration
+## 📈 Performance
 
-### **Monitoring & Observability**
-- **Health Checks**: Built-in health endpoints for all services
-- **Metrics Collection**: Prometheus-compatible metrics export
-- **Distributed Tracing**: Request tracing across microservices
-- **Log Aggregation**: Centralized logging with structured output
+### **Optimization Features**
+- Production build optimization with Vite
+- Lazy loading for React components
+- Database connection pooling
+- Efficient agent health checking
+- Response caching where appropriate
 
-### **Team Collaboration**
-- **Multi-User Support**: Team workspaces with individual user management
-- **Role-Based Access**: Configurable permissions for different team roles
-- **Real-Time Updates**: WebSocket-based live collaboration features
-- **Notification System**: Email and in-app notifications for important events
+### **Monitoring**
+- Built-in performance metrics
+- Agent response time tracking
+- Database query performance
+- Memory usage monitoring
+- Request/response logging
 
-## 📚 **Documentation**
+## 🛠️ Maintenance
 
-### **Platform Guides**
-- [🚀 Quick Start Guide](dev-team-platform/docs/SETUP.md)
-- [🏗️ Architecture Overview](dev-team-platform/docs/ARCHITECTURE.md)
-- [🔧 Configuration Guide](dev-team-platform/docs/CONFIGURATION.md)
-- [🤖 Agent Development](dev-team-platform/docs/AGENT-DEVELOPMENT.md)
-- [🔌 API Reference](dev-team-platform/docs/API.md)
-- [🐳 Deployment Guide](dev-team-platform/docs/DEPLOYMENT.md)
+### **Database Migrations**
+```bash
+# Run migrations
+npm run db:migrate
 
-### **Migration & Evolution**
-This platform represents the evolution from the original VS Code extension concept to a full-scale, web-based development platform. While maintaining the core intelligence and agent coordination capabilities, it now provides:
-- **Universal Access**: No longer restricted to VS Code users
-- **Team Scalability**: Multiple users and concurrent projects
-- **Production Deployment**: Enterprise-ready with proper monitoring and scaling
-- **API Integration**: Can be integrated with existing development workflows and tools
+# Rollback migrations
+npm run db:rollback
 
-## 🤝 **Contributing**
+# Generate new migration
+npm run db:generate
+```
 
-We welcome contributions to the Dev Team Platform! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+### **Logs and Debugging**
+- Application logs in `logs/` directory
+- Agent communication logs
+- Error tracking and reporting
+- Debug mode with verbose output
+
+### **Backup and Recovery**
+```bash
+# Backup database
+pg_dump -U user -h localhost devteam > backup.sql
+
+# Restore database
+psql -U user -h localhost devteam < backup.sql
+```
+
+## 📚 API Reference
+
+### **Core Endpoints**
+```typescript
+// Agent Management
+GET  /api/ai-agents              // List all agents with status
+GET  /api/ai-agents/:id          // Get specific agent details
+POST /api/ai-agents/:id/tasks    // Assign task to agent
+
+// Project Management
+GET  /api/projects               // List all projects
+POST /api/projects               // Create new project
+PUT  /api/projects/:id           // Update project
+DELETE /api/projects/:id         // Delete project
+
+// Authentication
+POST /api/auth/login            // User login
+POST /api/auth/logout           // User logout
+GET  /api/auth/user             // Current user info
+
+// System
+GET  /api/dashboard/stats       // System statistics
+GET  /api/health                // Health check
+```
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
 ### **Development Setup**
 ```bash
-git clone https://github.com/cmndcntrlcyber/dev-team.git
-cd dev-team/dev-team-platform
-npm run setup:dev
-npm run test:all
+# Fork and clone the repository
+git clone https://github.com/your-username/dev-team-platform.git
+cd dev-team-platform
+
+# Install dependencies
+npm install
+
+# Run tests
+npm test
+
+# Run linting
+npm run lint
 ```
 
-### **Testing**
-```bash
-npm run test:unit        # Unit tests for all services
-npm run test:integration # Integration tests
-npm run test:e2e         # End-to-end tests
-npm run lint:all         # Code quality checks
-npm run security:scan    # Security vulnerability scanning
-```
+## 📝 Changelog
 
-## 📝 **Changelog**
+### **Version 2.0.0** - Current
+- ✅ Single application architecture
+- ✅ Integrated agent system with mock mode
+- ✅ Platform-agnostic deployment
+- ✅ Real-time health monitoring
+- ✅ Modern React dashboard
+- ✅ PostgreSQL database integration
 
-### **Version 2.0.0** - Platform Release (Current)
-- ✅ Complete microservices architecture with 6 agent services
-- ✅ Web-based dashboard with React frontend
-- ✅ Multi-user support with authentication and authorization
-- ✅ Docker containerization and Docker Compose deployment
-- ✅ API-first design with comprehensive REST APIs
-- ✅ Real-time collaboration with WebSocket support
-- ✅ Production monitoring and observability features
+### **Version 1.0.0** - Legacy
+- Initial microservices architecture
+- Multiple container deployment
+- Complex service orchestration
 
-### **Version 1.0.0** - VS Code Extension (Legacy)
-- ✅ Original VS Code extension with embedded agent coordination
-- ✅ Single-user workflow with VS Code UI integration
-- ✅ Local development focus with editor-based interaction
-
-See [CHANGELOG.md](CHANGELOG.md) for detailed release notes.
-
-## 📄 **License**
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙋‍♂️ **Support**
+## 🙋‍♂️ Support
 
-### **Getting Help**
-- [📚 Platform Documentation](https://github.com/cmndcntrlcyber/dev-team/wiki)
-- [💬 GitHub Discussions](https://github.com/cmndcntrlcyber/dev-team/discussions)
-- [🐛 Issue Tracker](https://github.com/cmndcntrlcyber/dev-team/issues)
-- [📧 Email Support](mailto:support@dev-team-platform.com)
+### **Documentation**
+- [Installation Guide](docs/INSTALLATION.md)
+- [Configuration Reference](docs/CONFIGURATION.md)
+- [API Documentation](docs/API.md)
+- [Troubleshooting](docs/TROUBLESHOOTING.md)
 
 ### **Community**
-- [Discord Community](https://discord.gg/dev-team-platform)
-- [Twitter Updates](https://twitter.com/devteamplatform)
-- [Development Blog](https://blog.dev-team-platform.com)
-
-## 🌟 **Acknowledgments**
-
-Built with modern technologies:
-- [Docker](https://docker.com) - Containerization platform
-- [React](https://reactjs.org) - Frontend framework
-- [Node.js](https://nodejs.org) - Server runtime
-- [PostgreSQL](https://postgresql.org) - Primary database
-- [Redis](https://redis.io) - Caching and session management
-- [NATS](https://nats.io) - Message broker for microservices
-- [Anthropic Claude](https://www.anthropic.com) - AI agent intelligence
-- [Model Context Protocol](https://modelcontextprotocol.io) - External tool integration
+- [GitHub Issues](https://github.com/your-username/dev-team-platform/issues)
+- [Discussions](https://github.com/your-username/dev-team-platform/discussions)
 
 ---
 
-**Built with ❤️ by the Dev Team Platform community**
+**Built with ❤️ for development teams everywhere**
 
-*Empowering development teams with intelligent AI collaboration*
+*Empowering developers with intelligent AI collaboration*
