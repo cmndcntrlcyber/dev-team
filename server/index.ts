@@ -6,15 +6,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { agentConnector } from "./services/agent-connector";
 // Docker services disabled - Docker not available in this environment
-// import { dockerService } from "./services/docker";
-// import { volumePermissionManager } from "./services/volume-permission-manager";
-// import { redisHealthMonitor } from "./services/redis-health-monitor";
-// import { dockerErrorMonitor } from "./services/docker-error-monitor";
-// import { dockerRecoveryEngine } from "./services/docker-recovery-engine";
-// import { sysreptorLogMonitor } from "./services/sysreptor-log-monitor";
-// import { djangoHealthMonitor } from "./services/django-health-monitor";
-// import { djangoDatabaseValidator } from "./services/django-database-validator";
-// import { empireHealthMonitor } from "./services/empire-health-monitor";
+// Docker services disabled - Docker not available in this environment
 
 const app = express();
 app.use(express.json({ limit: '1gb' }));

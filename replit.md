@@ -1,10 +1,10 @@
-# Attack Node - Multi-Agent Security Platform
+# Dev Team Platform - Multi-Agent Development Platform
 
 ## Overview
 
-Attack Node is a comprehensive red team operations management platform that combines AI-powered security testing with Docker-based security tools. The platform enables security professionals to manage penetration testing operations, vulnerability assessments, and red team engagements through an integrated web interface.
+Dev Team Platform is a comprehensive development team management platform that enables sophisticated agent orchestration for software development workflows. The platform provides AI-powered development assistance through multiple specialized agents working together to build, test, and deploy applications.
 
-The application provides centralized management for security tools like Kali Linux, Burp Suite, Empire C2 framework, and other penetration testing utilities, while offering AI-driven vulnerability analysis and reporting capabilities through OpenAI and Anthropic integrations.
+The application features automatic connectivity to persistent Docker containers, real-time monitoring capabilities, and an integrated web interface for managing development team operations and multi-agent collaborations.
 
 ## User Preferences
 
@@ -15,7 +15,7 @@ Preferred communication style: Simple, everyday language.
 ### Frontend Architecture
 - **Framework**: React 18 with TypeScript for type safety
 - **UI Components**: Shadcn/UI component library with Radix UI primitives
-- **Styling**: Tailwind CSS with custom dark theme optimized for security professionals
+- **Styling**: Tailwind CSS with custom dark theme optimized for developers
 - **State Management**: TanStack Query for server state and caching
 - **Routing**: Wouter for lightweight client-side routing
 - **Build Tool**: Vite for fast development and optimized production builds
@@ -29,15 +29,15 @@ Preferred communication style: Simple, everyday language.
 - **Process Management**: Child process spawning for Docker container management
 
 ### Data Storage Solutions
-- **Primary Database**: PostgreSQL for structured data (operations, vulnerabilities, users, configurations)
+- **Primary Database**: PostgreSQL for structured data (projects, agents, users, configurations)
 - **Session Storage**: PostgreSQL-backed session store for user authentication
 - **File Storage**: Local filesystem with organized directory structure for uploads and container volumes
-- **Container Data**: Docker volumes for persistent container data (Redis, PostgreSQL, application data)
+- **Container Data**: Docker volumes for persistent container data (databases, application data)
 
 ### Container Management System
 - **Docker Integration**: Comprehensive Docker container lifecycle management
 - **Self-Healing Infrastructure**: Automated error detection and recovery for container issues
-- **Health Monitoring**: Real-time health checks for Redis, PostgreSQL, Django applications, and Empire C2
+- **Health Monitoring**: Real-time health checks for development containers and services
 - **Volume Management**: Automated permission fixing and volume validation
 - **Error Recovery**: Progressive escalation strategies for different error types
 
@@ -48,29 +48,28 @@ Preferred communication style: Simple, everyday language.
 - **CSRF Protection**: Session-based CSRF protection for all authenticated endpoints
 
 ### AI Integration Architecture
-- **OpenAI Integration**: GPT-4o for vulnerability report generation and security analysis
-- **Anthropic Claude**: Claude Sonnet 4 for advanced reasoning and complex security scenarios
-- **Agent Loop System**: Multi-agent conversation loops for automated security testing workflows
-- **Prompt Engineering**: Specialized prompts for security-focused AI interactions
+- **OpenAI Integration**: GPT-4o for code generation and development assistance
+- **Anthropic Claude**: Claude Sonnet 4 for advanced reasoning and complex development scenarios
+- **Agent Loop System**: Multi-agent conversation loops for automated development workflows
+- **Prompt Engineering**: Specialized prompts for development-focused AI interactions
 
 ## External Dependencies
 
 ### Third-Party APIs
-- **OpenAI API**: GPT-4o model for vulnerability report generation and security analysis
-- **Anthropic API**: Claude Sonnet 4 for advanced AI reasoning and complex security workflows
+- **OpenAI API**: GPT-4o model for code generation and development analysis
+- **Anthropic API**: Claude Sonnet 4 for advanced AI reasoning and complex development workflows
 - **Google OAuth 2.0**: Authentication service for secure user login and session management
 
 ### Docker Container Registry
-- **Docker Hub**: Primary registry for pulling security tool containers
+- **Docker Hub**: Primary registry for pulling development tool containers
 - **Alternative Registries**: GitHub Container Registry, Quay.io, and GitLab Registry for fallback scenarios
 - **Network Health Monitoring**: Automated detection and resolution of registry connectivity issues
 
-### Security Tool Containers
-- **Kali Linux**: `kasmweb/kali-rolling-desktop:develop` for penetration testing environment
-- **Empire C2**: `bcsecurity/empire:latest` for command and control framework
-- **Burp Suite**: Custom container deployment with professional license support
-- **VS Code**: `kasmweb/vs-code:1.17.0` for web-based development environment
-- **SysReptor**: Django-based reporting platform for professional security reports
+### Development Tool Containers
+- **Development Environments**: Containerized development environments for various tech stacks
+- **Database Containers**: PostgreSQL, Redis, and other database services
+- **API Services**: Containerized microservices for development workflows
+- **Build Tools**: Container-based build and deployment pipelines
 
 ### Database Dependencies
 - **PostgreSQL**: Primary database server (supports both containerized and native installations)
@@ -78,11 +77,11 @@ Preferred communication style: Simple, everyday language.
 - **Connection Pooling**: PG connection pool with automated connection management and health monitoring
 
 ### File System Dependencies
-- **Upload Directory Structure**: Organized file storage for certificates, container data, and user files
+- **Upload Directory Structure**: Organized file storage for project files, container data, and user uploads
 - **Volume Mounts**: Docker volume mounts for persistent container data
 - **Permission Management**: Automated UID/GID mapping for container file system access
 
 ### Network Dependencies
 - **DNS Resolution**: Multiple DNS servers (8.8.8.8, 1.1.1.1) with automated DNS health monitoring
 - **Port Management**: Dynamic port allocation and conflict resolution for container services
-- **TLS/SSL**: Certificate management system for client certificates and secure connections
+- **TLS/SSL**: Certificate management system for secure connections and API communications
