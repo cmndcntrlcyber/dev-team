@@ -4,6 +4,7 @@ config(); // Load environment variables from .env file
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { agentConnector } from "./services/agent-connector";
 // Docker services disabled - Docker not available in this environment
 // import { dockerService } from "./services/docker";
 // import { volumePermissionManager } from "./services/volume-permission-manager";
@@ -254,6 +255,15 @@ app.use((req, res, next) => {
   }
   */
   log("Docker health monitoring disabled - Docker is not available in this environment");
+  
+  // Initialize Agent Connector for dev-team containers
+  try {
+    log("Initializing Agent Connector for dev-team containers...");
+    await agentConnector.initialize();
+    log("Agent Connector initialized successfully");
+  } catch (error) {
+    log(`Warning: Failed to initialize Agent Connector: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 
   // Setup graceful shutdown
   const gracefulShutdown = async (signal: string) => {
@@ -262,6 +272,9 @@ app.use((req, res, next) => {
     try {
       // Docker service disabled
       // await dockerService.gracefulShutdown();
+      
+      // Destroy agent connector
+      agentConnector.destroy();
       
       // Close the server
       server.close(() => {
