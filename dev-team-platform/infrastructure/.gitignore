@@ -1,0 +1,62 @@
+# ==================================
+# Infrastructure - .gitignore
+# ==================================
+
+# Database Data
+postgres_data/
+redis_data/
+data/
+dumps/
+*.sql.backup
+*.dump
+*.backup
+
+# Database Files
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+
+# Redis Dumps
+dump.rdb
+appendonly.aof
+
+# Docker Volumes
+volumes/
+docker_data/
+.docker/
+
+# Logs
+logs/
+*.log
+
+# Monitoring Data
+prometheus_data/
+grafana_data/
+alertmanager_data/
+
+# Certificates and Keys
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+certs/
+ssl/
+
+# Configuration Overrides
+docker-compose.override.yml
+.env.local
+.env.production.local
+
+# Temporary Files
+tmp/
+temp/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# IDE Files
+.vscode/
+.idea/
