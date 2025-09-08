@@ -1,53 +1,83 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 interface AgentStatusProps {
   agent: any;
 }
 
 export function AgentStatus({ agent }: AgentStatusProps) {
-  const getStatusColor = () => {
-    switch (agent.status) {
-      case 'ACTIVE':
+  const [expanded, setExpanded] = useState(false);
+
+  const getStatusClass = () => {
+    switch (agent.status?.toLowerCase()) {
+      case 'active':
+      case 'online':
         return 'status-online';
-      case 'IDLE':
+      case 'error':
+        return 'status-error';
+      case 'idle':
+      case 'pending':
         return 'status-pending';
-      case 'ERROR':
+      case 'offline':
         return 'status-offline';
       default:
-        return 'status-pending';
+        return 'status-offline';
     }
   };
 
-  const getActivityIcon = () => {
-    switch (agent.type) {
-      case 'FRONTEND':
+  const getAgentTypeClass = () => {
+    switch (agent.agentType?.toLowerCase()) {
+      case 'anthropic':
+        return 'agent-type-anthropic';
+      case 'burp':
+        return 'agent-type-burp';
+      case 'local':
+        return 'agent-type-local';
+      default:
+        return 'agent-type-default';
+    }
+  };
+
+  const getAgentIcon = () => {
+    switch (agent.type?.toLowerCase()) {
+      case 'frontend':
+      case 'frontend_core':
         return (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M3 3h18v18H3V3zm16 16V5H5v14h14zM11 7h2v2h-2V7zm0 4h2v2h-2v-2z"/>
           </svg>
         );
-      case 'BACKEND':
+      case 'backend':
+      case 'backend_integration':
         return (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
           </svg>
         );
-      case 'QA':
+      case 'security':
+      case 'qa':
+      case 'quality_assurance':
         return (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
           </svg>
         );
-      case 'DEVOPS':
+      case 'devops':
         return (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+          </svg>
+        );
+      case 'architecture':
+      case 'architecture_lead':
+        return (
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
           </svg>
         );
       default:
         return (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
           </svg>
         );
     }
@@ -55,38 +85,80 @@ export function AgentStatus({ agent }: AgentStatusProps) {
 
   return (
     <div className="glass-card fade-in-up">
+      {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-lg flex items-center justify-center text-primary-blue" style={{
-            background: 'linear-gradient(135deg, rgba(9, 36, 165, 0.1), rgba(9, 36, 165, 0.2))'
-          }}>
-            {getActivityIcon()}
+          <div className="text-accent-secondary">
+            {getAgentIcon()}
           </div>
           <div>
-            <h4 className="text-lg font-semibold text-primary-blue">{agent.name}</h4>
-            <p className="text-sm text-primary-blue opacity-70">{agent.type}</p>
+            <h4 className="text-base font-bold text-primary terminal-text">
+              {agent.name || 'Unknown Agent'}
+            </h4>
+            <div className="flex items-center space-x-2 mt-1">
+              <span className={getAgentTypeClass()}>
+                {agent.agentType || 'default'}
+              </span>
+            </div>
           </div>
         </div>
-        <span className={getStatusColor()}>
-          {agent.status}
+        <span className={getStatusClass()}>
+          {agent.status || 'offline'}
         </span>
       </div>
 
-      <div className="space-y-3">
+      {/* Agent Details */}
+      <div className="space-y-3 text-sm">
+        {/* Type and Endpoint */}
+        <div className="grid grid-cols-2 gap-4 text-xs">
+          <div>
+            <span className="text-muted uppercase tracking-wider">Type:</span>
+            <div className="text-secondary terminal-text mt-1">
+              {agent.agentType || 'default'}
+            </div>
+          </div>
+          <div>
+            <span className="text-muted uppercase tracking-wider">Endpoint:</span>
+            <div className="text-secondary terminal-text mt-1 truncate">
+              {agent.endpoint || 'Default'}
+            </div>
+          </div>
+        </div>
+
+        {/* Last Ping and Created */}
+        <div className="grid grid-cols-2 gap-4 text-xs">
+          <div>
+            <span className="text-muted uppercase tracking-wider">Last Ping:</span>
+            <div className="text-secondary terminal-text mt-1">
+              {agent.lastPing || agent.lastActive || 'Never'}
+            </div>
+          </div>
+          <div>
+            <span className="text-muted uppercase tracking-wider">Created:</span>
+            <div className="text-secondary terminal-text mt-1">
+              {agent.created || agent.createdAt || 'Unknown'}
+            </div>
+          </div>
+        </div>
+
+        {/* Current Task */}
         {agent.currentTask && (
           <div>
-            <p className="text-xs font-medium text-primary-blue opacity-60 uppercase tracking-wide mb-1">
-              Current Task
-            </p>
-            <p className="text-sm text-primary-blue font-medium">{agent.currentTask}</p>
+            <span className="text-muted uppercase tracking-wider text-xs">Current Task:</span>
+            <div className="text-secondary terminal-text mt-1 text-sm">
+              {agent.currentTask}
+            </div>
           </div>
         )}
 
+        {/* Progress */}
         {agent.progress && (
           <div>
-            <div className="flex justify-between text-sm text-primary-blue mb-2">
-              <span className="font-medium">Progress</span>
-              <span className="font-semibold">{agent.progress}%</span>
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-muted uppercase tracking-wider text-xs">Progress:</span>
+              <span className="text-accent terminal-text text-xs font-bold">
+                {agent.progress}%
+              </span>
             </div>
             <div className="progress-modern">
               <div
@@ -97,17 +169,86 @@ export function AgentStatus({ agent }: AgentStatusProps) {
           </div>
         )}
 
-        <div className="flex items-center justify-between pt-2 border-t border-primary-blue border-opacity-10">
-          <div className="flex items-center space-x-2 text-xs text-primary-blue opacity-60">
-            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-            <span>Last active: {agent.lastActive || 'Now'}</span>
-          </div>
-          
-          <button className="text-primary-blue opacity-70 hover:opacity-100 transition-opacity">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-            </svg>
+        {/* Expandable Sections */}
+        <div className="pt-2 border-t border-primary">
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="text-accent hover:text-accent-secondary transition-colors text-xs uppercase tracking-wider font-bold"
+          >
+            {expanded ? '▼ Hide Details' : '▶ Show Details'}
           </button>
+
+          {expanded && (
+            <div className="mt-3 space-y-3">
+              {/* Custom Prompt */}
+              {agent.customPrompt && (
+                <div>
+                  <h5 className="text-accent text-xs uppercase tracking-wider font-bold mb-2">
+                    Custom Prompt
+                  </h5>
+                  <div className="code-block text-xs">
+                    {agent.customPrompt.length > 200 
+                      ? `${agent.customPrompt.substring(0, 200)}...` 
+                      : agent.customPrompt}
+                  </div>
+                </div>
+              )}
+
+              {/* Loop Configuration */}
+              {agent.loopConfig && (
+                <div>
+                  <h5 className="text-accent text-xs uppercase tracking-wider font-bold mb-2">
+                    Loop Configuration
+                  </h5>
+                  <div className="space-y-2 text-xs">
+                    {agent.loopConfig.partner && (
+                      <div className="flex justify-between">
+                        <span className="text-muted">Partner:</span>
+                        <span className="text-secondary terminal-text">{agent.loopConfig.partner}</span>
+                      </div>
+                    )}
+                    {agent.loopConfig.maxIterations && (
+                      <div className="flex justify-between">
+                        <span className="text-muted">Max Iterations:</span>
+                        <span className="text-secondary terminal-text">{agent.loopConfig.maxIterations}</span>
+                      </div>
+                    )}
+                    {agent.loopConfig.exitCondition && (
+                      <div className="flex justify-between">
+                        <span className="text-muted">Exit Condition:</span>
+                        <span className="text-secondary terminal-text">{agent.loopConfig.exitCondition}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Capabilities */}
+              {agent.capabilities && agent.capabilities.length > 0 && (
+                <div>
+                  <h5 className="text-accent text-xs uppercase tracking-wider font-bold mb-2">
+                    Capabilities
+                  </h5>
+                  <div className="text-xs text-secondary">
+                    {agent.capabilities.join(', ')}
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex space-x-2 pt-2">
+                <button className="text-accent hover:text-accent-secondary transition-colors text-xs uppercase tracking-wider font-bold">
+                  Test
+                </button>
+                <button className="text-accent hover:text-accent-secondary transition-colors text-xs uppercase tracking-wider font-bold">
+                  Start Loop
+                </button>
+                <button className="text-status-error hover:opacity-80 transition-opacity text-xs uppercase tracking-wider font-bold">
+                  Stop
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
