@@ -125,20 +125,33 @@ export const remoteSessions = pgTable("remote_sessions", {
 export const aiAgents = pgTable("ai_agents", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  type: text("type").notNull(), // openai, anthropic, local, burp
+  type: text("type").notNull(), // ARCHITECTURE_LEAD, FRONTEND_CORE, BACKEND_INTEGRATION, QUALITY_ASSURANCE, DEVOPS, MCP_INTEGRATION
   endpoint: text("endpoint"),
   apiKey: text("api_key"),
   modelPrompt: text("model_prompt"),
   flowOrder: integer("flow_order").default(0),
-  status: text("status").notNull().default("offline"), // online, offline, error
+  status: text("status").notNull().default("OFFLINE"), // INITIALIZING, READY, BUSY, BLOCKED, ERROR, OFFLINE
   lastPing: timestamp("last_ping"),
   config: json("config").$type<Record<string, any>>().default({}),
+  // Health and Metrics
+  cpuUsage: decimal("cpu_usage"),
+  memoryUsage: decimal("memory_usage"),
+  uptime: integer("uptime"), // in seconds
+  tasksCompleted: integer("tasks_completed").default(0),
+  tasksFailed: integer("tasks_failed").default(0),
+  averageResponseTime: decimal("average_response_time"), // in ms
+  // Task Management
+  currentTaskId: text("current_task_id"),
+  currentTaskProgress: integer("current_task_progress"), // percentage
+  taskQueue: json("task_queue").$type<string[]>().default([]),
+  capabilities: json("capabilities").$type<string[]>().default([]),
   // Loop configuration
   loopEnabled: boolean("loop_enabled").default(false),
   loopPartnerId: integer("loop_partner_id"),
   maxLoopIterations: integer("max_loop_iterations").default(5),
-  loopExitCondition: text("loop_exit_condition"), // 'functional_poc', 'vulnerability_confirmed', 'exploit_successful'
+  loopExitCondition: text("loop_exit_condition"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 // Operation Reports
