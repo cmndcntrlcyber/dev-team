@@ -24,7 +24,7 @@
   --ring: hsl(0, 100%, 60%);
   --radius: 0.5rem;
   
-  /* Attack Node Platform specific colors */
+  /* Dev Team Platform specific colors */
   --dark: hsl(180, 35%, 7%);
   --surface: hsl(180, 30%, 10%);
   --card-dark: hsl(180, 25%, 13%);
@@ -208,7 +208,7 @@ textarea:focus-visible {
   animation: statusPulse 2s ease-in-out infinite;
 }
 
-/* Attack Node specific animations and effects */
+/* Dev Team Platform specific animations and effects */
 @keyframes pulse-red {
   0%, 100% {
     opacity: 1;

@@ -370,7 +370,7 @@ export default function Dashboard() {
                   <h4 className="font-medium text-gray-100">Security Tools</h4>
                   <div className="space-y-2">
                     {configsList.filter((config: any) => config.category === 'security').map((config: any) => {
-                      const container = containersList.find((c: any) => c.name === `attacknode-${config.name}`);
+                      const container = containersList.find((c: any) => c.name === `devteam-${config.name}`);
                       const isRunning = container?.status === 'running';
                       
                       return (
@@ -411,7 +411,7 @@ export default function Dashboard() {
                   <h4 className="font-medium text-gray-100 mt-4">Infrastructure</h4>
                   <div className="space-y-2">
                     {configsList.filter((config: any) => config.category === 'infrastructure').map((config: any) => {
-                      const container = containersList.find((c: any) => c.name === `attacknode-${config.name}`);
+                      const container = containersList.find((c: any) => c.name === `devteam-${config.name}`);
                       const isRunning = container?.status === 'running';
                       
                       return (

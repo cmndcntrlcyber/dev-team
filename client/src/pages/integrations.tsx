@@ -887,14 +887,14 @@ export default function Integrations() {
                         </div>
                         <div className="bg-black border border-gray-600 rounded p-4 h-64 overflow-y-auto">
                           <div className="text-green-400 font-mono text-sm">
-                            <div className="mb-2">root@{selectedContainer.name.replace('attacknode-', '')}:~# </div>
+                            <div className="mb-2">root@{selectedContainer.name.replace('devteam-', '')}:~# </div>
                             <div className="text-gray-400">
                               {showTerminal ? (
                                 <div>
                                   <div>Terminal connection established</div>
                                   <div>Type 'help' for available commands</div>
                                   <div className="mt-2 text-green-400">
-                                    root@{selectedContainer.name.replace('attacknode-', '')}:~# <span className="animate-pulse">_</span>
+                                    root@{selectedContainer.name.replace('devteam-', '')}:~# <span className="animate-pulse">_</span>
                                   </div>
                                 </div>
                               ) : (
