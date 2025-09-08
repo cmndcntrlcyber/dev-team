@@ -167,14 +167,42 @@ export class AgentConnector {
   private async checkAgentHealth(agent: any) {
     if (!agent.endpoint) return;
 
+    // Check if this is a mock/development mode agent
+    const isMockMode = process.env.NODE_ENV === 'development' && 
+                      agent.endpoint.startsWith('http://localhost:30');
+
     try {
+      // For mock mode, simulate successful connection with mock data
+      if (isMockMode) {
+        const mockHealth = this.getMockHealthData(agent.type);
+        
+        await db.update(aiAgents)
+          .set({
+            status: "READY",
+            lastPing: new Date(),
+            averageResponseTime: mockHealth.responseTime.toString(),
+            cpuUsage: mockHealth.cpu.toString(),
+            memoryUsage: mockHealth.memory.toString(),
+            uptime: mockHealth.uptime,
+            healthStatus: JSON.stringify({
+              mock: true,
+              capabilities: this.getAgentCapabilities(agent.type),
+              version: "1.0.0-mock"
+            })
+          })
+          .where(eq(aiAgents.id, agent.id));
+
+        console.log(`Agent ${agent.name} running in MOCK mode (containers not available)`);
+        return;
+      }
+
       // Try to ping the agent endpoint - try multiple paths
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 3000); // 3 second timeout
       
       const startTime = Date.now();
       
-      // Try different endpoints
+      // Try different endpoints based on documentation
       const endpoints = ['/health', '/status', '/ping', '/'];
       let response = null;
       
@@ -212,9 +240,10 @@ export class AgentConnector {
             status: "READY", // Mark as ready since service is reachable
             lastPing: new Date(),
             averageResponseTime: responseTime.toString(),
-            cpuUsage: healthData.cpu?.toString() || "0",
-            memoryUsage: healthData.memory?.toString() || "0",
-            uptime: healthData.uptime || Math.floor((Date.now() - agent.createdAt) / 1000)
+            cpuUsage: healthData.cpu?.toString() || healthData.dependencies?.cpu || "0",
+            memoryUsage: healthData.memory?.toString() || healthData.dependencies?.memory || "0",
+            uptime: healthData.uptime || Math.floor((Date.now() - agent.createdAt) / 1000),
+            healthStatus: JSON.stringify(healthData.dependencies || {})
           })
           .where(eq(aiAgents.id, agent.id));
 
@@ -329,6 +358,85 @@ export class AgentConnector {
       
       throw error;
     }
+  }
+
+  private getMockHealthData(agentType: string) {
+    // Generate realistic mock health data for development
+    const baseData = {
+      responseTime: Math.floor(Math.random() * 100) + 50,
+      cpu: Math.floor(Math.random() * 30) + 10,
+      memory: Math.floor(Math.random() * 40) + 20,
+      uptime: Math.floor(Math.random() * 86400) + 3600
+    };
+
+    // Add some variation based on agent type
+    switch (agentType) {
+      case 'ARCHITECTURE_LEAD':
+        return { ...baseData, cpu: baseData.cpu * 0.8, memory: baseData.memory * 1.2 };
+      case 'FRONTEND_CORE':
+        return { ...baseData, cpu: baseData.cpu * 1.1, memory: baseData.memory * 0.9 };
+      case 'BACKEND_INTEGRATION':
+        return { ...baseData, cpu: baseData.cpu * 1.3, memory: baseData.memory * 1.3 };
+      case 'QUALITY_ASSURANCE':
+        return { ...baseData, cpu: baseData.cpu * 0.9, memory: baseData.memory * 0.8 };
+      case 'DEVOPS':
+        return { ...baseData, cpu: baseData.cpu * 1.2, memory: baseData.memory * 1.1 };
+      case 'MCP_INTEGRATION':
+        return { ...baseData, cpu: baseData.cpu * 0.7, memory: baseData.memory * 0.7 };
+      default:
+        return baseData;
+    }
+  }
+
+  private getAgentCapabilities(agentType: string) {
+    // Return capabilities based on agent type from documentation
+    const capabilities: Record<string, string[]> = {
+      'ARCHITECTURE_LEAD': [
+        'Architecture Design',
+        'System Planning',
+        'Technology Selection',
+        'Design Patterns',
+        'System Integration'
+      ],
+      'FRONTEND_CORE': [
+        'React/Vue/Angular component generation',
+        'CSS/SCSS styling',
+        'State management',
+        'Code refactoring',
+        'UI/UX implementation'
+      ],
+      'BACKEND_INTEGRATION': [
+        'Backend API development',
+        'Database integration',
+        'Service architecture',
+        'API testing',
+        'Performance optimization',
+        'Security implementation'
+      ],
+      'QUALITY_ASSURANCE': [
+        'Test generation',
+        'Test execution',
+        'Bug detection',
+        'Performance testing',
+        'Security testing'
+      ],
+      'DEVOPS': [
+        'CI/CD pipeline',
+        'Container management',
+        'Infrastructure as Code',
+        'Monitoring setup',
+        'Deployment automation'
+      ],
+      'MCP_INTEGRATION': [
+        'Protocol integration',
+        'Service connectivity',
+        'API gateway management',
+        'Message routing',
+        'Protocol translation'
+      ]
+    };
+
+    return capabilities[agentType] || ['General agent capabilities'];
   }
 
   destroy() {
