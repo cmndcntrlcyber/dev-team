@@ -95,7 +95,7 @@ function SortableFlowItem({ agent }: { agent: AiAgent }) {
         </div>
         <div className="flex-1">
           <h4 className="text-gray-100 font-medium">{agent.name}</h4>
-          <p className="text-sm text-gray-400 capitalize">{agent.type} Agent</p>
+          <p className="text-sm text-gray-400 capitalize">{agent.type === 'qa' ? 'QA' : agent.type === 'mcp' ? 'MCP Integration' : agent.type} Agent</p>
         </div>
         <div className="text-sm text-gray-500">
           Order: {agent.flowOrder || 0}
@@ -107,20 +107,24 @@ function SortableFlowItem({ agent }: { agent: AiAgent }) {
 
 function getAgentIcon(type: string) {
   switch (type) {
-    case 'openai':
+    case 'frontend':
       return Bot;
-    case 'anthropic':
-      return Bot;
-    case 'local':
+    case 'backend':
       return Brain;
-    case 'burp':
+    case 'devops':
+      return Zap;
+    case 'qa':
+      return CheckCircle;
+    case 'architecture':
+      return Target;
+    case 'mcp':
       return Shield;
     default:
       return Bot;
   }
 }
 
-export default function AiAgents() {
+export default function DevAgents() {
   const [showForm, setShowForm] = useState(false);
   const [editingAgent, setEditingAgent] = useState<AiAgent | null>(null);
   const { toast } = useToast();
