@@ -3,39 +3,34 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { 
-  Shield, 
+  Users, 
   BarChart3, 
-  Bug, 
-  Target, 
+  CheckSquare, 
+  Briefcase, 
   Bot, 
   Settings, 
-  Monitor,
   Gauge,
   Grid3X3,
   FolderOpen,
   LogOut,
-  FileKey,
-  Container
+  FileKey
 } from "lucide-react";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: Gauge },
-  { name: "Programs & Targets", href: "/programs", icon: Target },
-  { name: "Vulnerability Reports", href: "/vulnerabilities", icon: Bug },
+  { name: "Projects", href: "/projects", icon: Briefcase },
+  { name: "Tasks", href: "/tasks", icon: CheckSquare },
   { name: "Analytics", href: "/analytics", icon: BarChart3 },
 ];
 
 const integrations = [
-  { name: "AI Agents", href: "/ai-agents", icon: Bot },
-  { name: "Container Management", href: "/containers", icon: Container },
+  { name: "Dev Agents", href: "/agents", icon: Bot },
+  { name: "Team Members", href: "/team", icon: Users },
   { name: "All Integrations", href: "/integrations", icon: Grid3X3 },
-  { name: "Burp Suite", href: "/burp", icon: Shield },
-  { name: "Kali Environment", href: "/kali-environment", icon: Monitor },
 ];
 
 const settings = [
   { name: "File Manager", href: "/file-manager", icon: FolderOpen },
-  { name: "Client Certificates", href: "/certificates", icon: FileKey },
   { name: "Configuration", href: "/settings", icon: Settings },
 ];
 
@@ -45,8 +40,8 @@ export default function Sidebar() {
   return (
     <div className="fixed left-0 top-0 h-full w-64 bg-surface border-r border-gray-700 z-50">
       <div className="p-6 border-b border-gray-700">
-        <h1 className="text-xl font-bold text-red-500">Attack Node</h1>
-        <p className="text-xs text-gray-400 mt-1">Multi-Agent Security Platform</p>
+        <h1 className="text-xl font-bold text-blue-500">Dev Team</h1>
+        <p className="text-xs text-gray-400 mt-1">AI-Powered Development Platform</p>
       </div>
       
       <nav className="mt-6">

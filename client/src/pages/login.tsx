@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, Zap, Target, BarChart3 } from "lucide-react";
+import { Users, Code, Cpu, BarChart3 } from "lucide-react";
 
 export default function Login() {
   const handleGoogleLogin = () => {
@@ -14,43 +14,43 @@ export default function Login() {
         <div className="space-y-6">
           <div className="space-y-2">
             <h1 className="text-4xl font-bold text-gray-100">
-              Attack Node
+              Dev Team Platform
             </h1>
             <p className="text-xl text-gray-400">
-              Multi-agent security platform for penetration testing
+              AI-powered development orchestration platform
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="p-4 bg-surface rounded-lg border border-gray-700">
-              <Shield className="h-8 w-8 text-primary mb-2" />
-              <h3 className="font-semibold text-gray-100 mb-1">AI Agents</h3>
+              <Users className="h-8 w-8 text-primary mb-2" />
+              <h3 className="font-semibold text-gray-100 mb-1">AI Dev Agents</h3>
               <p className="text-sm text-gray-400">
-                Automated vulnerability analysis with OpenAI and Anthropic
+                Specialized agents for frontend, backend, QA, and DevOps
               </p>
             </div>
             
             <div className="p-4 bg-surface rounded-lg border border-gray-700">
-              <Target className="h-8 w-8 text-primary mb-2" />
-              <h3 className="font-semibold text-gray-100 mb-1">Program Tracking</h3>
+              <Code className="h-8 w-8 text-primary mb-2" />
+              <h3 className="font-semibold text-gray-100 mb-1">Project Management</h3>
               <p className="text-sm text-gray-400">
-                Manage bug bounty programs from HackerOne, Bugcrowd, and more
+                Coordinate development projects across multiple agents
               </p>
             </div>
             
             <div className="p-4 bg-surface rounded-lg border border-gray-700">
-              <Zap className="h-8 w-8 text-primary mb-2" />
-              <h3 className="font-semibold text-gray-100 mb-1">Agent Loops</h3>
+              <Cpu className="h-8 w-8 text-primary mb-2" />
+              <h3 className="font-semibold text-gray-100 mb-1">Agent Orchestration</h3>
               <p className="text-sm text-gray-400">
-                Iterative payload refinement until POCs are functional
+                Automated workflow coordination between development agents
               </p>
             </div>
             
             <div className="p-4 bg-surface rounded-lg border border-gray-700">
               <BarChart3 className="h-8 w-8 text-primary mb-2" />
-              <h3 className="font-semibold text-gray-100 mb-1">Analytics</h3>
+              <h3 className="font-semibold text-gray-100 mb-1">Development Analytics</h3>
               <p className="text-sm text-gray-400">
-                Track earnings, response times, and vulnerability trends
+                Track progress, productivity, and code quality metrics
               </p>
             </div>
           </div>
@@ -58,15 +58,15 @@ export default function Login() {
           <div className="space-y-3 text-sm text-gray-400">
             <div className="flex items-center space-x-2">
               <div className="w-2 h-2 bg-primary rounded-full"></div>
-              <span>Docker integration with Burp Suite Professional and Kali Linux</span>
+              <span>Full-stack development with AI-powered code generation</span>
             </div>
             <div className="flex items-center space-x-2">
               <div className="w-2 h-2 bg-primary rounded-full"></div>
-              <span>Personal file management at /home/{`{username}`}</span>
+              <span>Project templates and automated deployment pipelines</span>
             </div>
             <div className="flex items-center space-x-2">
               <div className="w-2 h-2 bg-primary rounded-full"></div>
-              <span>Real-time agent loop monitoring and control</span>
+              <span>Real-time agent collaboration and task monitoring</span>
             </div>
           </div>
         </div>
@@ -77,7 +77,7 @@ export default function Login() {
             <CardHeader className="text-center">
               <CardTitle className="text-gray-100">Welcome Back</CardTitle>
               <CardDescription className="text-gray-400">
-                Sign in to access your security testing command center
+                Sign in to access your development command center
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">

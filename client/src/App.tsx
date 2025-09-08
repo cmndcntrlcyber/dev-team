@@ -6,14 +6,11 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard";
-import Programs from "@/pages/programs";
-import Vulnerabilities from "@/pages/vulnerabilities";
+import Projects from "@/pages/projects";
+import Tasks from "@/pages/tasks";
 import Analytics from "@/pages/analytics";
-import AiAgents from "@/pages/ai-agents";
-import KaliEnvironment from "@/pages/kali-environment";
-import BurpSuite from "@/pages/burp-suite";
+import DevAgents from "@/pages/dev-agents";
 import Integrations from "@/pages/integrations";
-import ContainerManagement from "@/pages/container-management";
 import FileManager from "@/pages/file-manager";
 import Certificates from "@/pages/certificates";
 import Settings from "@/pages/settings";
@@ -41,14 +38,11 @@ function Router() {
       <div className="flex-1 ml-64">
         <Switch>
           <Route path="/" component={Dashboard} />
-          <Route path="/programs" component={Programs} />
-          <Route path="/vulnerabilities" component={Vulnerabilities} />
+          <Route path="/projects" component={Projects} />
+          <Route path="/tasks" component={Tasks} />
           <Route path="/analytics" component={Analytics} />
-          <Route path="/ai-agents" component={AiAgents} />
-          <Route path="/kali-environment" component={KaliEnvironment} />
-          <Route path="/burp" component={BurpSuite} />
+          <Route path="/agents" component={DevAgents} />
           <Route path="/integrations" component={Integrations} />
-          <Route path="/containers" component={ContainerManagement} />
           <Route path="/file-manager" component={FileManager} />
           <Route path="/certificates" component={Certificates} />
           <Route path="/settings" component={Settings} />
