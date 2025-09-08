@@ -1,0 +1,144 @@
+Based on my analysis of your agent services, here are __ALL the direct HTTP endpoints__ for each agent in your dev-team platform:
+
+## 🏗️ __Architecture Agent__ (`localhost:3010`)
+
+```javascript
+GET  /health          - Health check with dependencies status
+GET  /status          - Agent status and capabilities
+POST /execute         - Manual task execution
+```
+
+__Capabilities__: Architecture Design, System Planning, Technology Selection
+
+## 🎨 __Frontend Core Agent__ (`localhost:3011`)
+
+```javascript
+GET  /health          - Health check with dependencies status  
+GET  /status          - Agent status and capabilities
+POST /execute         - Manual task execution
+```
+
+__Capabilities__: React/Vue/Angular component generation, CSS/SCSS styling, State management, Code refactoring
+
+## 🔧 __Backend Integration Agent__ (`localhost:3012`)
+
+```javascript
+GET  /health          - Health check with dependencies status
+GET  /status          - Agent status and capabilities  
+POST /execute         - Manual task execution
+```
+
+__Capabilities__: Backend API development, Database integration, Service architecture, API testing, Performance optimization, Security implementation
+
+## 🧪 __Quality Assurance Agent__ (`localhost:3013`)
+
+```javascript
+GET  /health          - Health check with dependencies status
+GET  /status          - Agent status and capabilities
+POST /execute         - Manual task execution
+```
+
+## 🚀 __DevOps Agent__ (`localhost:3014`)
+
+```javascript
+GET  /health          - Health check with dependencies status
+GET  /status          - Agent status and capabilities
+POST /execute         - Manual task execution
+```
+
+## 🔌 __MCP Integration Agent__ (`localhost:3015`)
+
+```javascript
+GET  /health          - Health check with dependencies status
+GET  /status          - Agent status and capabilities
+POST /execute         - Manual task execution
+```
+
+## __Complete cURL Examples__
+
+### Health Checks
+
+```bash
+# Check all agent health
+curl http://localhost:3010/health  # Architecture
+curl http://localhost:3011/health  # Frontend  
+curl http://localhost:3012/health  # Backend
+curl http://localhost:3013/health  # QA
+curl http://localhost:3014/health  # DevOps
+curl http://localhost:3015/health  # MCP
+```
+
+### Status Queries
+
+```bash
+# Get agent capabilities and status
+curl http://localhost:3010/status  # Architecture
+curl http://localhost:3011/status  # Frontend
+curl http://localhost:3012/status  # Backend
+curl http://localhost:3013/status  # QA
+curl http://localhost:3014/status  # DevOps
+curl http://localhost:3015/status  # MCP
+```
+
+### Manual Task Execution
+
+```bash
+# Execute a task directly on an agent
+curl -X POST http://localhost:3011/execute \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": "task-123",
+    "type": "component_generation",
+    "description": "Create a React login form",
+    "priority": "high"
+  }'
+```
+
+## __Response Formats__
+
+### Health Response
+
+```json
+{
+  "status": "healthy",
+  "timestamp": "2025-01-08T06:38:00.000Z",
+  "version": "1.0.0",
+  "dependencies": {
+    "redis": true,
+    "nats": true,
+    "anthropic": "connected"
+  }
+}
+```
+
+### Status Response
+
+```json
+{
+  "agent": "FrontendCoreAgent",
+  "status": "active", 
+  "capabilities": [
+    "React component generation",
+    "Vue component generation",
+    "CSS/SCSS styling"
+  ],
+  "timestamp": "2025-01-08T06:38:00.000Z"
+}
+```
+
+## __Inter-Agent Communication__
+
+__NATS Messaging Topics:__
+
+- `agent.frontend.tasks` - Frontend agent task queue
+- `agent.backend.tasks` - Backend agent task queue
+- `agent.architecture.tasks` - Architecture agent task queue
+- `agent.qa.tasks` - QA agent task queue
+- `agent.devops.tasks` - DevOps agent task queue
+- `agent.mcp.tasks` - MCP agent task queue
+
+__Completion Notifications:__
+
+- `agent.{type}.completed` - Task completion notifications
+
+All agents follow this consistent pattern, making them easy to integrate and monitor programmatically.

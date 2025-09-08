@@ -671,7 +671,7 @@ export default function DevAgents() {
             <div key={type} className="space-y-3">
               <div className="flex items-center gap-2">
                 <div className={`p-1.5 rounded ${getAgentColor(type)}`}>
-                  {getAgentIcon(type)({ className: "h-4 w-4" })}
+                  {React.createElement(getAgentIcon(type), { className: "h-4 w-4" })}
                 </div>
                 <h3 className="text-lg font-semibold text-gray-200">{type.replace(/_/g, ' ')}</h3>
                 <Badge variant="secondary" className="ml-2">{typeAgents.length} agents</Badge>
@@ -716,7 +716,7 @@ export default function DevAgents() {
                 <CardHeader>
                   <CardTitle className="text-base flex items-center justify-between">
                     <span className="flex items-center gap-2">
-                      {getAgentIcon(agent.type)({ className: "h-4 w-4" })}
+                      {React.createElement(getAgentIcon(agent.type), { className: "h-4 w-4" })}
                       {agent.name}
                     </span>
                     {getStatusIcon(agent.status)}
