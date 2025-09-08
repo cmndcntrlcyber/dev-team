@@ -62,7 +62,7 @@ cp .env.example .env
 # Edit .env with your API keys
 
 # Start all services
-docker-compose up -d
+docker compose up -d
 
 # Access the platform
 open http://localhost:3000
