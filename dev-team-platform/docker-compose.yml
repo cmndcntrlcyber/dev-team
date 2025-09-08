@@ -169,6 +169,7 @@ services:
       - "3004:3004"
     environment:
       NODE_ENV: development
+      DOCKER: "true"
       PORT: 3004
       HOST: 0.0.0.0
       DATABASE_URL: postgresql://devteam:devteam_secure_password@postgres:5432/dev_team_platform
@@ -206,6 +207,7 @@ services:
       - "3010:3010"
     environment:
       NODE_ENV: development
+      DOCKER: "true"
       PORT: 3010
       HOST: 0.0.0.0
       AGENT_ID: architecture-lead-001
@@ -236,6 +238,7 @@ services:
       - "3011:3011"
     environment:
       NODE_ENV: development
+      DOCKER: "true"
       PORT: 3011
       HOST: 0.0.0.0
       AGENT_ID: frontend-core-001
@@ -265,6 +268,7 @@ services:
       - "3012:3012"
     environment:
       NODE_ENV: development
+      DOCKER: "true"
       PORT: 3012
       HOST: 0.0.0.0
       AGENT_ID: backend-integration-001
@@ -294,6 +298,7 @@ services:
       - "3013:3013"
     environment:
       NODE_ENV: development
+      DOCKER: "true"
       PORT: 3013
       HOST: 0.0.0.0
       AGENT_ID: qa-001
@@ -323,6 +328,7 @@ services:
       - "3014:3014"
     environment:
       NODE_ENV: development
+      DOCKER: "true"
       PORT: 3014
       HOST: 0.0.0.0
       AGENT_ID: devops-001
@@ -352,6 +358,7 @@ services:
       - "3015:3015"
     environment:
       NODE_ENV: development
+      DOCKER: "true"
       PORT: 3015
       HOST: 0.0.0.0
       AGENT_ID: mcp-integration-001

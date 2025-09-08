@@ -23,8 +23,13 @@ class AuthenticationService {
   private emailService!: EmailService;
 
   constructor() {
+    // Use different logging configuration for Docker vs development
+    const isDocker = process.env.NODE_ENV === 'production' || process.env.DOCKER === 'true';
+    
     this.fastify = Fastify({
-      logger: {
+      logger: isDocker ? {
+        level: process.env.LOG_LEVEL || 'info',
+      } : {
         level: process.env.LOG_LEVEL || 'info',
         transport: {
           target: 'pino-pretty',

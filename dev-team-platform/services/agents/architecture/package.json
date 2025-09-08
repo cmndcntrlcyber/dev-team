@@ -20,6 +20,7 @@
     "@fastify/helmet": "^11.1.0",
     "@fastify/rate-limit": "^8.0.0",
     "nats": "^2.16.0",
+    "redis": "^4.6.0",
     "zod": "^3.22.0",
     "pino": "^8.15.0",
     "uuid": "^9.0.0",

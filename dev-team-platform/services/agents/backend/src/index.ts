@@ -5,14 +5,10 @@ import { createClient } from 'redis';
 import { connect, NatsConnection, StringCodec, JSONCodec } from 'nats';
 import pino from 'pino';
 
-import { FrontendCoreAgent } from './agent/FrontendCoreAgent';
-import { ComponentGenerator } from './generators/componentGenerator';
-import { StyleGenerator } from './styling/styleGenerator';
-import { StateGenerator } from './state/stateGenerator';
-import { AnthropicClient } from './ai/anthropicClient';
+import { BackendIntegrationAgent } from './agent/BackendIntegrationAgent';
 import { AgentTask } from './shared';
 
-interface FrontendAgentConfig {
+interface BackendAgentConfig {
   port: number;
   host: string;
   redisUrl: string;
@@ -21,17 +17,13 @@ interface FrontendAgentConfig {
   logLevel: string;
 }
 
-class FrontendAgentService {
+class BackendAgentService {
   private fastify: FastifyInstance;
-  private config: FrontendAgentConfig;
+  private config: BackendAgentConfig;
   private redis: any;
   private nats: NatsConnection | null = null;
   private logger: any;
-  private agent: FrontendCoreAgent;
-  private componentGenerator: ComponentGenerator;
-  private styleGenerator: StyleGenerator;
-  private stateGenerator: StateGenerator;
-  private aiClient: AnthropicClient;
+  private agent: BackendIntegrationAgent;
 
   constructor() {
     // Use different logging configuration for Docker vs development
@@ -56,7 +48,7 @@ class FrontendAgentService {
     });
 
     this.config = {
-      port: parseInt(process.env.PORT || '3001', 10),
+      port: parseInt(process.env.PORT || '3012', 10),
       host: process.env.HOST || '0.0.0.0',
       redisUrl: process.env.REDIS_URL || 'redis://localhost:6379',
       natsUrl: process.env.NATS_URL || 'nats://localhost:4222',
@@ -64,16 +56,8 @@ class FrontendAgentService {
       logLevel: process.env.LOG_LEVEL || 'info',
     };
 
-    // Initialize AI client
-    this.aiClient = new AnthropicClient(this.logger);
-
-    // Initialize generators
-    this.componentGenerator = new ComponentGenerator(this.aiClient, this.logger);
-    this.styleGenerator = new StyleGenerator(this.aiClient, this.logger);
-    this.stateGenerator = new StateGenerator(this.aiClient, this.logger);
-
     // Initialize core agent
-    this.agent = new FrontendCoreAgent(this.logger);
+    this.agent = new BackendIntegrationAgent(this.logger);
   }
 
   async initialize(): Promise<void> {
@@ -109,9 +93,9 @@ class FrontendAgentService {
       // Setup message handlers
       await this.setupMessageHandlers();
 
-      this.logger.info('Frontend Agent Service initialized successfully');
+      this.logger.info('Backend Agent Service initialized successfully');
     } catch (error) {
-      this.logger.error('Failed to initialize Frontend Agent Service', error);
+      this.logger.error('Failed to initialize Backend Agent Service', error);
       throw error;
     }
   }
@@ -144,7 +128,7 @@ class FrontendAgentService {
           dependencies: {
             redis: await this.checkRedisHealth(),
             nats: this.nats?.isClosed() === false,
-            anthropic: this.aiClient ? 'connected' : 'disconnected',
+            anthropic: 'connected',
           },
         };
         
@@ -161,15 +145,15 @@ class FrontendAgentService {
     // Agent status endpoint
     this.fastify.get('/status', async (request, reply) => {
       return reply.code(200).send({
-        agent: 'FrontendCoreAgent',
+        agent: 'BackendIntegrationAgent',
         status: 'active',
         capabilities: [
-          'React component generation',
-          'Vue component generation', 
-          'Angular component generation',
-          'CSS/SCSS styling',
-          'State management',
-          'Code refactoring',
+          'Backend API development',
+          'Database integration',
+          'Service architecture',
+          'API testing',
+          'Performance optimization',
+          'Security implementation',
         ],
         timestamp: new Date(),
       });
@@ -205,8 +189,8 @@ class FrontendAgentService {
     const sc = StringCodec();
     const jc = JSONCodec();
 
-    // Subscribe to frontend agent tasks
-    const subscription = this.nats.subscribe('agent.frontend.tasks');
+    // Subscribe to backend agent tasks
+    const subscription = this.nats.subscribe('agent.backend.tasks');
     
     (async () => {
       for await (const message of subscription) {
@@ -226,7 +210,7 @@ class FrontendAgentService {
           }
           
           // Publish completion notification
-          this.nats?.publish('agent.frontend.completed', jc.encode({
+          this.nats?.publish('agent.backend.completed', jc.encode({
             taskId: task.id,
             result,
             timestamp: new Date(),
@@ -265,9 +249,9 @@ class FrontendAgentService {
         host: this.config.host,
       });
       
-      this.logger.info(`🎨 Frontend Agent Service running on http://${this.config.host}:${this.config.port}`);
+      this.logger.info(`🔧 Backend Agent Service running on http://${this.config.host}:${this.config.port}`);
     } catch (error) {
-      this.logger.error('Failed to start Frontend Agent Service', error);
+      this.logger.error('Failed to start Backend Agent Service', error);
       throw error;
     }
   }
@@ -283,16 +267,16 @@ class FrontendAgentService {
       }
       
       await this.fastify.close();
-      this.logger.info('Frontend Agent Service stopped gracefully');
+      this.logger.info('Backend Agent Service stopped gracefully');
     } catch (error) {
-      this.logger.error('Error stopping Frontend Agent Service', error);
+      this.logger.error('Error stopping Backend Agent Service', error);
       throw error;
     }
   }
 }
 
 // Create and start the service
-const service = new FrontendAgentService();
+const service = new BackendAgentService();
 
 process.on('SIGTERM', async () => {
   console.log('Received SIGTERM, shutting down gracefully...');
@@ -311,9 +295,9 @@ if (require.main === module) {
   service.initialize().then(() => {
     return service.start();
   }).catch((error) => {
-    console.error('Failed to start Frontend Agent Service:', error);
+    console.error('Failed to start Backend Agent Service:', error);
     process.exit(1);
   });
 }
 
-export { FrontendAgentService };
+export { BackendAgentService };
