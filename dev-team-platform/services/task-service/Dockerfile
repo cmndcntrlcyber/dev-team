@@ -18,8 +18,8 @@ RUN npm install
 
 COPY . .
 
-# Build TypeScript if tsconfig exists
-RUN if [ -f "tsconfig.json" ]; then npm run build; fi
+# Build TypeScript
+RUN npm run build
 
 # Production image, copy all the files and run
 FROM base AS runner

@@ -63,11 +63,11 @@ services:
       PORT: 3000
       HOST: 0.0.0.0
       REDIS_URL: redis://redis:6379
-      JWT_SECRET: your_jwt_secret_change_in_production
+      JWT_SECRET: ${JWT_SECRET}
       CORS_ORIGINS: "*"
       RATE_LIMIT_WINDOW: 60000
       RATE_LIMIT_MAX: 100
-      LOG_LEVEL: info
+      LOG_LEVEL: ${LOG_LEVEL:-info}
     depends_on:
       - redis
       - nats
@@ -96,6 +96,8 @@ services:
       NATS_URL: nats://nats:4222
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
       TAVILY_API_KEY: ${TAVILY_API_KEY}
+      JWT_SECRET: ${JWT_SECRET}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
     depends_on:
       - postgres
       - redis
@@ -116,8 +118,8 @@ services:
       DATABASE_URL: postgresql://devteam:devteam_secure_password@postgres:5432/dev_team_platform
       REDIS_URL: redis://redis:6379
       NATS_URL: nats://nats:4222
-      JWT_SECRET: your_jwt_secret_change_in_production
-      LOG_LEVEL: info
+      JWT_SECRET: ${JWT_SECRET}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
     volumes:
       - project_files:/app/data/projects
     depends_on:
@@ -145,8 +147,8 @@ services:
       DATABASE_URL: postgresql://devteam:devteam_secure_password@postgres:5432/dev_team_platform
       REDIS_URL: redis://redis:6379
       NATS_URL: nats://nats:4222
-      JWT_SECRET: your_jwt_secret_change_in_production
-      LOG_LEVEL: info
+      JWT_SECRET: ${JWT_SECRET}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
     depends_on:
       - postgres
       - redis
@@ -171,10 +173,10 @@ services:
       HOST: 0.0.0.0
       DATABASE_URL: postgresql://devteam:devteam_secure_password@postgres:5432/dev_team_platform
       REDIS_URL: redis://redis:6379
-      JWT_SECRET: your_jwt_secret_change_in_production
-      JWT_EXPIRES_IN: 15m
-      REFRESH_TOKEN_EXPIRES_IN: 7d
-      BASE_URL: http://localhost:3004
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
+      REFRESH_TOKEN_EXPIRES_IN: ${REFRESH_TOKEN_EXPIRES_IN:-7d}
+      BASE_URL: ${BASE_URL:-http://localhost:3004}
       GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
       GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
@@ -183,7 +185,7 @@ services:
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASS: ${SMTP_PASS:-}
-      LOG_LEVEL: info
+      LOG_LEVEL: ${LOG_LEVEL:-info}
     depends_on:
       - postgres
       - redis
@@ -210,6 +212,7 @@ services:
       AGENT_TYPE: ARCHITECTURE_LEAD
       NATS_URL: nats://nats:4222
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      ANTHROPIC_MODEL: claude-opus-4-1-20250805
       TAVILY_API_KEY: ${TAVILY_API_KEY}
       LOG_LEVEL: info
       WORKING_DIRECTORY: /app/workspace
@@ -239,6 +242,7 @@ services:
       AGENT_TYPE: FRONTEND_CORE
       NATS_URL: nats://nats:4222
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      ANTHROPIC_MODEL: claude-sonnet-4-20250514:1M
       LOG_LEVEL: info
       WORKING_DIRECTORY: /app/workspace
     volumes:
@@ -267,6 +271,7 @@ services:
       AGENT_TYPE: BACKEND_INTEGRATION
       NATS_URL: nats://nats:4222
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      ANTHROPIC_MODEL: claude-sonnet-4-20250514:1M
       LOG_LEVEL: info
       WORKING_DIRECTORY: /app/workspace
     volumes:
@@ -295,6 +300,7 @@ services:
       AGENT_TYPE: QUALITY_ASSURANCE
       NATS_URL: nats://nats:4222
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      ANTHROPIC_MODEL: claude-opus-4-1-20250805
       LOG_LEVEL: info
       WORKING_DIRECTORY: /app/workspace
     volumes:
@@ -323,6 +329,7 @@ services:
       AGENT_TYPE: DEVOPS
       NATS_URL: nats://nats:4222
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      ANTHROPIC_MODEL: claude-sonnet-4-20250514:1M
       LOG_LEVEL: info
       WORKING_DIRECTORY: /app/workspace
     volumes:
@@ -351,6 +358,7 @@ services:
       AGENT_TYPE: MCP_INTEGRATION
       NATS_URL: nats://nats:4222
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      ANTHROPIC_MODEL: claude-sonnet-4-20250514:1M
       LOG_LEVEL: info
       WORKING_DIRECTORY: /app/workspace
     volumes:

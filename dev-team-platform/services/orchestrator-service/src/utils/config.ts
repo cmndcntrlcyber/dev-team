@@ -1,4 +1,4 @@
-import { PlatformConfig, RateLimitConfig } from '../shared';
+import { PlatformConfig, RateLimitConfig } from '../types/shared';
 
 export interface ConfigValidationResult {
     isValid: boolean;
@@ -13,6 +13,9 @@ export class ConfigManager {
     async loadConfig(): Promise<PlatformConfig> {
         try {
             const config: PlatformConfig = {
+                // Environment
+                nodeEnv: this.getOptionalEnv('NODE_ENV', 'development'),
+                
                 // Core API Keys
                 anthropicApiKey: this.getRequiredEnv('ANTHROPIC_API_KEY'),
                 tavilyApiKey: this.getOptionalEnv('TAVILY_API_KEY'),

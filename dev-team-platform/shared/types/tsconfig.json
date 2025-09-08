@@ -13,13 +13,15 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "types": []
   },
   "include": [
     "src/**/*"
   ],
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
+    "**/*.test.ts"
   ]
 }

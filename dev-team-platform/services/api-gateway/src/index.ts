@@ -15,7 +15,7 @@ const routeConfig = {
     {
       path: '/api/auth/*',
       service: 'auth-service',
-      host: 'http://auth-service:3001',
+      host: 'http://auth-service:3004',
       methods: ['GET', 'POST', 'PUT', 'DELETE'],
       auth: false,
       websocket: false
@@ -87,7 +87,7 @@ class ApiGateway {
 
   constructor() {
     this.fastify = Fastify({
-      logger: {
+      logger: process.env.NODE_ENV === 'development' ? {
         level: process.env.LOG_LEVEL || 'info',
         transport: {
           target: 'pino-pretty',
@@ -97,6 +97,8 @@ class ApiGateway {
             ignore: 'pid,hostname',
           },
         },
+      } : {
+        level: process.env.LOG_LEVEL || 'info',
       },
     });
 

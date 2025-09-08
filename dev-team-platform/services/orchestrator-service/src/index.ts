@@ -15,7 +15,7 @@ import {
     PlatformError,
     BaseAgent,
     Project
-} from "./shared";
+} from "./types/shared";
 import { AgentOrchestrator } from './orchestrator/AgentOrchestrator';
 import { DatabaseManager } from './database/DatabaseManager';
 import { MessageBroker } from './messaging/MessageBroker';
@@ -31,7 +31,7 @@ async function createServer() {
 
     // Create Fastify instance
     const fastify = Fastify({
-        logger: {
+        logger: config.nodeEnv === 'development' ? {
             level: config.logLevel,
             transport: {
                 target: 'pino-pretty',
@@ -41,6 +41,8 @@ async function createServer() {
                     ignore: 'pid,hostname',
                 },
             },
+        } : {
+            level: config.logLevel,
         },
     });
 
@@ -79,8 +81,12 @@ async function createServer() {
     await orchestrator.initialize();
 
     // Register request context decorator
-    fastify.decorateRequest('requestId', '');
-    fastify.decorateRequest('user', null);
+    if (!fastify.hasRequestDecorator('requestId')) {
+        fastify.decorateRequest('requestId', '');
+    }
+    if (!fastify.hasRequestDecorator('user')) {
+        fastify.decorateRequest('user', null);
+    }
 
     // Add request ID to all requests
     fastify.addHook('onRequest', async (request) => {

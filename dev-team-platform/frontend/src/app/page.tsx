@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { ProjectCard } from '@/components/projects/ProjectCard';
 import { AgentStatus } from '@/components/agents/AgentStatus';
 import { TaskProgress } from '@/components/tasks/TaskProgress';
+import { TaskSubmissionForm } from '@/components/tasks/TaskSubmissionForm';
 
 interface DashboardStats {
   totalProjects: number;
@@ -27,6 +28,7 @@ export default function Dashboard() {
   const [recentProjects, setRecentProjects] = useState<any[]>([]);
   const [agentStatuses, setAgentStatuses] = useState<any[]>([]);
   const [recentTasks, setRecentTasks] = useState<any[]>([]);
+  const [showTaskForm, setShowTaskForm] = useState(false);
 
   useEffect(() => {
     // Fetch dashboard data
@@ -129,9 +131,28 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600">Welcome to your AI-powered development team platform</p>
+      <div className="mb-8 flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold text-primary-blue">Dashboard</h1>
+          <p className="text-primary-blue opacity-80">Welcome to your AI-powered development team platform</p>
+        </div>
+        <div className="space-x-3 flex">
+          <button
+            onClick={() => setShowTaskForm(true)}
+            className="btn-primary-modern px-6 py-3 flex items-center space-x-2"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            <span>Submit Task to Agents</span>
+          </button>
+          <button className="btn-primary-modern px-6 py-3 flex items-center space-x-2">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+            <span>Create Project</span>
+          </button>
+        </div>
       </div>
 
       {/* Stats Grid */}
@@ -275,6 +296,19 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Task Submission Form Modal */}
+      {showTaskForm && (
+        <TaskSubmissionForm
+          onSubmit={(taskData) => {
+            console.log('Submitting task:', taskData);
+            // TODO: Integrate with actual API
+            alert('Task submitted successfully! The agents will begin working on it shortly.');
+            setShowTaskForm(false);
+          }}
+          onClose={() => setShowTaskForm(false)}
+        />
+      )}
     </div>
   );
 }
