@@ -392,15 +392,12 @@ export default function DevAgents() {
     },
   });
 
-  const { data: agents = [], isLoading } = useQuery({
+  const { data: agents = [], isLoading } = useQuery<AiAgent[]>({
     queryKey: ["/api/ai-agents"],
   });
 
   const createAgent = useMutation({
-    mutationFn: (data: FormData) => apiRequest("/api/ai-agents", {
-      method: "POST",
-      body: JSON.stringify(data),
-    }),
+    mutationFn: (data: FormData) => apiRequest("/api/ai-agents", "POST", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/ai-agents"] });
       setShowForm(false);
@@ -420,10 +417,7 @@ export default function DevAgents() {
   });
 
   const updateAgent = useMutation({
-    mutationFn: (data: FormData & { id: number }) => apiRequest(`/api/ai-agents/${data.id}`, {
-      method: "PUT",
-      body: JSON.stringify(data),
-    }),
+    mutationFn: (data: FormData & { id: number }) => apiRequest(`/api/ai-agents/${data.id}`, "PUT", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/ai-agents"] });
       setEditingAgent(null);
@@ -443,9 +437,7 @@ export default function DevAgents() {
   });
 
   const deleteAgent = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/ai-agents/${id}`, {
-      method: "DELETE",
-    }),
+    mutationFn: (id: number) => apiRequest(`/api/ai-agents/${id}`, "DELETE"),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/ai-agents"] });
       toast({
@@ -495,7 +487,7 @@ export default function DevAgents() {
   }, [queryClient]);
 
   // Group agents by type
-  const agentsByType = agents.reduce((acc: Record<string, AiAgent[]>, agent: AiAgent) => {
+  const agentsByType = (agents as AiAgent[]).reduce((acc: Record<string, AiAgent[]>, agent: AiAgent) => {
     const type = agent.type;
     if (!acc[type]) acc[type] = [];
     acc[type].push(agent);
@@ -578,7 +570,7 @@ export default function DevAgents() {
                     <FormItem>
                       <FormLabel>Service Endpoint</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="http://localhost:3001" className="bg-background border-gray-600" />
+                        <Input {...field} value={field.value || ""} placeholder="http://localhost:3001" className="bg-background border-gray-600" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -592,7 +584,7 @@ export default function DevAgents() {
                     <FormItem>
                       <FormLabel>API Key</FormLabel>
                       <FormControl>
-                        <Input {...field} type="password" placeholder="Optional API key" className="bg-background border-gray-600" />
+                        <Input {...field} value={field.value || ""} type="password" placeholder="Optional API key" className="bg-background border-gray-600" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -606,7 +598,7 @@ export default function DevAgents() {
                     <FormItem>
                       <FormLabel>System Prompt</FormLabel>
                       <FormControl>
-                        <Textarea {...field} placeholder="Agent instructions and behavior..." className="bg-background border-gray-600 min-h-[100px]" />
+                        <Textarea {...field} value={field.value || ""} placeholder="Agent instructions and behavior..." className="bg-background border-gray-600 min-h-[100px]" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -662,7 +654,7 @@ export default function DevAgents() {
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {agents.map((agent: AiAgent) => (
+              {(agents as AiAgent[]).map((agent: AiAgent) => (
                 <AgentCard
                   key={agent.id}
                   agent={agent}
@@ -685,7 +677,7 @@ export default function DevAgents() {
                 <Badge variant="secondary" className="ml-2">{typeAgents.length} agents</Badge>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {typeAgents.map((agent) => (
+                {(typeAgents as AiAgent[]).map((agent: AiAgent) => (
                   <AgentCard
                     key={agent.id}
                     agent={agent}
@@ -719,7 +711,7 @@ export default function DevAgents() {
 
         <TabsContent value="health" className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {agents.map((agent: AiAgent) => (
+            {(agents as AiAgent[]).map((agent: AiAgent) => (
               <Card key={agent.id} className="bg-surface border-gray-700">
                 <CardHeader>
                   <CardTitle className="text-base flex items-center justify-between">
