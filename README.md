@@ -1,433 +1,344 @@
-# Dev Team Platform
+# Attack Node 🔥
 
-**AI-Powered Multi-Agent Development Team - Microservices Architecture**
+A comprehensive red team operations management platform with AI integration, Docker-based security tools, and advanced analytics. Transform your security testing workflow with intelligent automation and seamless tool integration.
 
-A comprehensive platform that coordinates specialized AI agents to build, test, and deploy your projects with intelligent collaboration and human oversight. This microservices-based system provides a web dashboard for development teams to manage projects and tasks efficiently.
-
-[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Docker](https://img.shields.io/badge/docker-ready-blue)](https://docker.com)
-[![Microservices](https://img.shields.io/badge/architecture-microservices-green)](https://microservices.io)
-
-## 🌟 Overview
-
-The Dev Team Platform transforms AI-powered development collaboration into a scalable, web-based microservices architecture. Originally conceived as a VS Code extension, it has evolved into a standalone platform that any development team can deploy and use through a modern web interface.
-
-### 🏗️ **Architecture**
-
-- **Frontend Dashboard**: React-based project and task management interface
-- **API Gateway**: Authentication, routing, and rate limiting (Port 3000)
-- **Core Services**: Orchestrator, Project Management, Task Management
-- **Agent Services**: 6 specialized AI agents as individual microservices
-- **Infrastructure**: PostgreSQL, Redis, NATS messaging for scalability
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Node.js](https://img.shields.io/badge/Node.js-20.x-green.svg)
+![React](https://img.shields.io/badge/React-18.x-blue.svg)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue.svg)
 
 ## ✨ Features
 
-### 🤖 **6 Specialized AI Agent Services**
-- **Architecture Agent** (Port 3010): Project coordination, technology decisions, quality oversight
-- **Frontend Agent** (Port 3011): React/Vue/Angular components, routing, state management
-- **Backend Agent** (Port 3012): APIs, databases, authentication, microservices
-- **QA Agent** (Port 3013): Automated testing, code quality, security scanning
-- **DevOps Agent** (Port 3014): CI/CD pipelines, containerization, cloud deployment
-- **MCP Agent** (Port 3015): Model Context Protocol servers, external integrations
+### 🎯 Red Team Operations Management
+- **Operation Planning**: Organize and track red team engagements
+- **Target Management**: Centralized target tracking and documentation
+- **Vulnerability Assessment**: Comprehensive vulnerability tracking and reporting
+- **Progress Monitoring**: Real-time operation status and progress tracking
 
-### 🧠 **Intelligent Coordination**
-- **Smart Task Distribution**: AI-powered assignment based on agent capabilities and workload
-- **Web-Based Human Feedback**: Decision points with intuitive web interface
-- **Real-time Progress Monitoring**: Live project analytics and predictions
-- **Quality Gates**: Automated quality validation before deployment
-- **Dependency Management**: Critical path analysis and blocker resolution
+### 🤖 AI-Powered Intelligence
+- **OpenAI Integration**: Leverage GPT models for reconnaissance and analysis
+- **Anthropic Claude**: Advanced reasoning for complex security scenarios
+- **Automated Reporting**: AI-generated vulnerability reports and documentation
+- **Intelligent Recommendations**: AI-suggested attack vectors and methodologies
 
-### 🚀 **Production Ready**
-- **Containerized Deployment**: Complete Docker and Docker Compose setup
-- **Scalable Architecture**: Each agent runs as an independent microservice
-- **API-First Design**: RESTful APIs for easy integration with existing tools
-- **Team Collaboration**: Multi-user support with role-based access control
-- **Performance Monitoring**: Built-in logging, metrics, and health checks
+### 🐳 Docker-Based Security Tools
+- **Kali Linux Environment**: Fully containerized Kali Linux with VNC access
+- **Burp Suite Professional**: Integrated web application security testing
+- **Tool Management**: Easy deployment and management of security tools
+- **Isolated Environments**: Secure, isolated testing environments
 
-## 📦 Quick Start
+### 📊 Advanced Analytics
+- **Dashboard Analytics**: Real-time statistics and progress tracking
+- **Vulnerability Trends**: Historical data analysis and trend visualization
+- **Performance Metrics**: Operation efficiency and success rate tracking
+- **Custom Reports**: Detailed reporting and data export capabilities
+
+### 🔐 Security & Authentication
+- **Google OAuth Integration**: Secure authentication with Google accounts
+- **Session Management**: Secure session handling and user management
+- **Role-Based Access**: Granular permission control
+- **Audit Logging**: Comprehensive activity logging and monitoring
+
+## 🚀 Quick Start
 
 ### Prerequisites
-- **Docker & Docker Compose**: Latest versions
-- **Node.js**: Version 18.0 or higher (for development)
-- **API Keys**: Anthropic Claude (required for AI agents)
+- Node.js 20.x or higher
+- PostgreSQL 15+
+- Docker & Docker Compose (optional, for security tools)
+- Git
 
-### 🚀 **Deploy with Docker**
+### Installation
+
+#### Option 1: Quick Setup (Ubuntu 22.04)
 ```bash
-# Clone the repository
-git clone https://github.com/cmndcntrlcyber/dev-team.git
-cd dev-team/dev-team-platform
-
-# Configure environment
-cp .env.example .env
-# Edit .env with your API keys
-
-# Start all services
-docker-compose up -d
-
-# Access the platform
-open http://localhost:3000
+git clone https://github.com/attck-nexus/attack-node.git
+cd attack-node
+chmod +x setup.sh
+./setup.sh
+npm run dev
 ```
 
-### 🔧 **Development Setup**
+#### Option 2: Manual Setup
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/attck-nexus/attack-node.git
+   cd attack-node
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
+
+4. **Start services (Docker)**
+   ```bash
+   npm run docker:dev
+   ```
+
+5. **Configure database**
+   ```bash
+   npm run db:push
+   ```
+
+6. **Start the application**
+   ```bash
+   npm run dev
+   ```
+
+7. **Access the application**
+   - Open your browser to `http://localhost:5000`
+   - Default development user is automatically created
+
+## 📋 Environment Configuration
+
+Create a `.env` file in the root directory:
+
+```env
+# Database Configuration
+DATABASE_URL=postgresql://user:password@localhost:5432/attacknode
+
+# Server Configuration
+NODE_ENV=development
+PORT=5000
+SESSION_SECRET=your_secure_session_secret_here
+
+# AI Integration
+OPENAI_API_KEY=your_openai_api_key
+ANTHROPIC_API_KEY=your_anthropic_api_key
+
+# Google OAuth (Production)
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+```
+
+## 🛠️ Technology Stack
+
+### Backend
+- **Node.js** - Runtime environment
+- **Express.js** - Web framework
+- **TypeScript** - Type safety
+- **Drizzle ORM** - Database ORM
+- **PostgreSQL** - Primary database
+- **Passport.js** - Authentication
+- **Multer** - File uploads
+- **WebSocket** - Real-time communication
+
+### Frontend
+- **React 18** - UI framework
+- **TypeScript** - Type safety
+- **Tailwind CSS** - Styling
+- **Radix UI** - Component library
+- **Tanstack Query** - Data fetching
+- **Wouter** - Client-side routing
+- **Framer Motion** - Animations
+
+### AI & Integrations
+- **OpenAI SDK** - GPT model integration
+- **Anthropic SDK** - Claude model integration
+- **Docker** - Containerization
+- **WebSocket** - Real-time updates
+
+## 🏗️ Project Structure
+
+```
+attack-node/
+├── client/                 # React frontend
+│   ├── src/
+│   │   ├── components/    # UI components
+│   │   ├── pages/         # Page components
+│   │   ├── hooks/         # Custom hooks
+│   │   └── lib/          # Utilities
+├── server/                # Express backend
+│   ├── services/         # Business logic
+│   ├── routes.ts         # API routes
+│   └── index.ts          # Server entry point
+├── shared/               # Shared types and schemas
+├── uploads/              # File uploads
+└── public/              # Static assets
+```
+
+## 🔧 Available Scripts
+
 ```bash
-# Install dependencies for all services
-npm run install:all
+# Development
+npm run dev          # Start development server
+npm run check        # TypeScript type checking
 
-# Start in development mode
-npm run dev:all
-
-# Or start services individually
-npm run dev:frontend
-npm run dev:gateway
-npm run dev:orchestrator
-```
-
-## 🌐 **Service Architecture**
-
-### **Core Services**
-```yaml
-api-gateway:        # Port 3000 - Main entry point
-orchestrator:       # Port 3001 - Agent coordination
-project-service:    # Port 3002 - Project & file management
-task-service:       # Port 3003 - Task assignment & tracking
-auth-service:       # Port 3004 - Authentication & authorization
-```
-
-### **Agent Services**
-```yaml
-agent-architecture: # Port 3010 - Technical leadership
-agent-frontend:     # Port 3011 - UI/UX development
-agent-backend:      # Port 3012 - Server-side development
-agent-qa:          # Port 3013 - Quality assurance
-agent-devops:      # Port 3014 - Infrastructure & deployment
-agent-mcp:         # Port 3015 - External integrations
-```
-
-### **Infrastructure**
-```yaml
-postgres:          # Port 5432 - Primary database
-redis:             # Port 6379 - Caching & sessions
-nats:              # Port 4222 - Inter-service messaging
-```
-
-## 📊 **Platform Dashboard**
-
-### **Project Management**
-- **Project Overview**: Create, manage, and monitor development projects
-- **File Management**: Version control integration and file organization
-- **Template System**: Pre-configured project templates for common stacks
-- **Team Collaboration**: Multi-user workspace with role-based permissions
-
-### **Task Coordination**
-- **Intelligent Assignment**: AI analyzes requirements and assigns to optimal agents
-- **Visual Kanban Board**: Drag-and-drop task management interface
-- **Dependency Tracking**: Automatic detection and visualization of task dependencies
-- **Progress Analytics**: Real-time metrics and completion forecasting
-
-### **Agent Monitoring**
-- **Live Agent Status**: Monitor health and performance of all agent services
-- **Task Distribution**: View current workload across agents
-- **Performance Metrics**: Response times, success rates, and resource usage
-- **Quality Metrics**: Code quality scores, test coverage, and security ratings
-
-## 🤖 **Agent Capabilities**
-
-### **Architecture Agent** (Port 3010)
-```typescript
-// Project leadership and technical coordination
-- Technology stack analysis and recommendations
-- System architecture design and validation
-- Code review and quality oversight
-- Project timeline management and risk assessment
-- Integration coordination between other agents
-```
-
-### **Frontend Agent** (Port 3011)
-```typescript
-// Modern UI/UX development
-- React/Vue/Angular/Svelte component generation
-- Responsive design with Tailwind CSS/Material-UI
-- State management (Redux, Zustand, Context API)
-- API integration and data fetching patterns
-- Accessibility compliance and performance optimization
-```
-
-### **Backend Agent** (Port 3012)
-```typescript
-// Server-side and API development
-- Express.js/FastAPI/NestJS server setup
-- Database schema design and migrations
-- Authentication systems (JWT, OAuth, RBAC)
-- API documentation (OpenAPI/Swagger)
-- Microservices architecture implementation
-```
-
-### **QA Agent** (Port 3013)
-```typescript
-// Comprehensive quality assurance
-- Unit, integration, and E2E test generation
-- Code quality analysis (ESLint, Prettier, SonarQube)
-- Security vulnerability scanning (OWASP)
-- Performance testing and benchmarking
-- Accessibility validation (WCAG compliance)
-```
-
-### **DevOps Agent** (Port 3014)
-```typescript
-// Infrastructure and deployment automation
-- CI/CD pipeline creation (GitHub Actions, GitLab CI)
-- Docker containerization and optimization
-- Kubernetes orchestration and scaling
-- Cloud infrastructure (AWS/GCP/Azure)
-- Monitoring, logging, and alerting setup
-```
-
-### **MCP Agent** (Port 3015)
-```typescript
-// External system integration
-- Model Context Protocol server development
-- Custom tool and resource creation
-- Third-party API integration (GitHub, OpenAI, databases)
-- Plugin architecture development
-- Documentation generation and client setup
-```
-
-## 🔄 **Development Workflow**
-
-### 1. **Project Initialization**
-```mermaid
-graph LR
-    A[Create Project] --> B[Architecture Analysis]
-    B --> C[Agent Assignment]
-    C --> D[Parallel Development]
-    D --> E[Quality Gates]
-    E --> F[Integration & Deployment]
-```
-
-### 2. **Intelligent Task Distribution**
-- **Capability Analysis**: System analyzes each agent's current workload and expertise
-- **Dependency Resolution**: Automatic detection and ordering of interdependent tasks
-- **Load Balancing**: Dynamic distribution to prevent bottlenecks
-- **Human Oversight**: Critical decisions escalated to team leads through web interface
-
-### 3. **Quality Assurance Pipeline**
-- **Continuous Testing**: Automated unit, integration, and E2E tests
-- **Code Quality Gates**: Configurable quality thresholds for deployment
-- **Security Scanning**: OWASP Top 10 and dependency vulnerability checks
-- **Performance Validation**: Response time and resource usage monitoring
-
-## ⚙️ **Configuration**
-
-### **Environment Variables**
-```bash
-# API Keys
-ANTHROPIC_API_KEY=your-anthropic-key
-TAVILY_API_KEY=your-tavily-key-optional
+# Production
+npm run build        # Build for production
+npm run start        # Start production server
 
 # Database
-DATABASE_URL=postgresql://user:password@postgres:5432/devteam
-REDIS_URL=redis://redis:6379
-
-# Services
-API_GATEWAY_PORT=3000
-ORCHESTRATOR_PORT=3001
-PROJECT_SERVICE_PORT=3002
-TASK_SERVICE_PORT=3003
-
-# Agent Configuration
-MAX_CONCURRENT_TASKS=5
-AGENT_TIMEOUT=60000
-LOG_LEVEL=info
+npm run db:push      # Push database schema changes
 ```
 
-### **Agent Settings**
-```json
-{
-  "agents": {
-    "architecture": { "enabled": true, "maxConcurrentTasks": 2 },
-    "frontend": { "enabled": true, "maxConcurrentTasks": 3 },
-    "backend": { "enabled": true, "maxConcurrentTasks": 3 },
-    "qa": { "enabled": true, "maxConcurrentTasks": 4 },
-    "devops": { "enabled": true, "maxConcurrentTasks": 2 },
-    "mcp": { "enabled": true, "maxConcurrentTasks": 2 }
-  }
-}
+## 🐳 Docker Integration
+
+### Kali Linux Environment
+
+**Access Information:**
+- **URL**: `https://localhost:6902` (HTTPS required)
+- **Username**: `kasm_user`
+- **Password**: `password`
+- **User Privileges**: Root access enabled for full system control
+- **SSL Certificate**: Self-signed (accept browser security warning)
+
+**Features:**
+- **Persistent Storage**: All files and configurations automatically saved
+- **Root Access**: Full administrative privileges for advanced operations
+- **Shared Directory**: Access to `/home/kasm-user/shared` for file transfers
+- **Pre-installed Tools**: Complete Kali Linux arsenal (Nmap, Metasploit, Burp Suite, etc.)
+
+**Getting Started:**
+1. Start Kali Linux container from the Integrations tab or Kali Environment page
+2. Wait for container initialization (1-2 minutes for full setup)
+3. Navigate to `https://localhost:6902` in your browser
+4. Accept the SSL certificate warning (click "Advanced" → "Proceed to localhost")
+5. Login with username `kasm_user` and password `password`
+6. Enjoy full Kali Linux desktop with root privileges and persistent storage
+
+**Data Persistence:**
+- **Home Directory**: All user files persist between container restarts
+- **Tool Configurations**: Settings and preferences automatically saved
+- **Downloads**: Files downloaded remain available across sessions
+- **Custom Scripts**: Personal scripts and tools persist permanently
+- **Storage Location**: `uploads/kasm_profiles/kali-root/` on host system
+
+**Troubleshooting:**
+- **HTTP 401 Error**: Ensure you're using HTTPS (not HTTP) and correct credentials
+- **Connection Refused**: Verify container is running via Docker Dashboard
+- **SSL Warning**: Accept the self-signed certificate to proceed
+- **Slow Loading**: Allow 2-3 minutes for complete container initialization
+- **Permission Issues**: Container runs with root privileges for full access
+
+### Burp Suite Professional
+
+**Setup:**
+1. Upload your Burp Suite Professional .jar file via the Burp Suite page
+2. Optionally upload your license file for full functionality
+3. Choose between GUI mode (VNC access) or headless mode (API only)
+4. Access via the application's integrated interface
+
+**Access Methods:**
+- **GUI Mode**: Web-based VNC interface for full Burp Suite desktop
+- **Headless Mode**: API integration for automated scanning
 ```
 
-### **Quality Gates**
-```json
-{
-  "qualityGates": {
-    "testCoverage": 85,
-    "codeQuality": 8.0,
-    "securityScan": true,
-    "performanceCheck": true,
-    "accessibilityValidation": true
-  }
-}
-```
+## 🤖 AI Agent Configuration
 
-## 🎯 **Use Cases**
+### OpenAI Integration
+1. Obtain OpenAI API key from [OpenAI Platform](https://platform.openai.com/)
+2. Add to `.env` file: `OPENAI_API_KEY=your_key_here`
+3. Configure in the AI Agents section
 
-### **Full-Stack Web Applications**
-- **Modern SPA Development**: React/Vue/Angular with TypeScript
-- **API Development**: RESTful and GraphQL services with comprehensive documentation
-- **Database Integration**: Schema design, migrations, and ORM configuration
-- **Authentication Systems**: Complete JWT/OAuth implementation with RBAC
+### Anthropic Claude
+1. Get Anthropic API key from [Anthropic Console](https://console.anthropic.com/)
+2. Add to `.env` file: `ANTHROPIC_API_KEY=your_key_here`
+3. Configure in the AI Agents section
 
-### **Microservices Architecture**
-- **Service Decomposition**: Intelligent breaking down of monoliths
-- **Inter-Service Communication**: Event-driven architecture with NATS
-- **API Gateway Setup**: Rate limiting, authentication, and routing
-- **Container Orchestration**: Docker and Kubernetes deployment strategies
+## 📊 Dashboard Overview
 
-### **MCP Server Development**
-- **Custom Tool Creation**: Specialized MCP tools for any domain or workflow
-- **External API Integration**: Seamless connection to GitHub, OpenAI, databases
-- **Protocol Implementation**: Full MCP specification compliance
-- **Client Integration**: Easy connection with MCP-compatible applications
+The main dashboard provides:
+- **Operation Statistics**: Active operations, vulnerabilities, and success metrics
+- **AI Agent Status**: Real-time status of connected AI agents
+- **Recent Activity**: Latest operations and findings
+- **Vulnerability Trends**: Historical analysis and trending data
+- **Quick Actions**: Rapid access to common tasks
 
-### **DevOps and CI/CD**
-- **Pipeline Automation**: Complete GitHub Actions and GitLab CI workflows
-- **Infrastructure as Code**: Terraform and CloudFormation templates
-- **Monitoring Setup**: Comprehensive observability with Prometheus and Grafana
-- **Security Integration**: SAST/DAST scanning and vulnerability management
+## 🔒 Security Features
 
-## 📈 **Performance Metrics**
+- **Secure Authentication**: Google OAuth integration with fallback
+- **Session Management**: Secure session handling with PostgreSQL storage
+- **File Upload Security**: Validated file uploads with size limits
+- **Input Validation**: Comprehensive input validation using Zod
+- **SQL Injection Prevention**: ORM-based queries with parameterization
+- **XSS Protection**: Content Security Policy and input sanitization
 
-### **Platform Performance**
-- **Service Startup**: <30 seconds for complete platform deployment
-- **Agent Response Time**: <3 seconds average across all agents
-- **Memory Usage**: Optimized container images with minimal resource footprint
-- **Throughput**: Handles 100+ concurrent tasks across agent services
+## 🛡️ Best Practices
 
-### **Development Velocity**
-- **Project Bootstrapping**: 10-15 minutes for complete project setup
-- **Code Generation Speed**: 60-80% faster than traditional manual development
-- **Quality Assurance**: 90%+ automated test coverage with quality gates
-- **Deployment Time**: One-command deployment to multiple environments
+### Development
+- Use TypeScript for type safety
+- Follow React best practices
+- Implement proper error handling
+- Use environment variables for configuration
+- Regular dependency updates
 
-## 🔒 **Security & Privacy**
+### Security
+- Keep API keys secure
+- Use strong session secrets
+- Implement proper authentication
+- Regular security audits
+- Monitor for vulnerabilities
 
-### **Data Protection**
-- **Local Deployment**: Complete control over data with on-premises deployment
-- **API Key Security**: Secure environment variable management
-- **Database Encryption**: At-rest and in-transit encryption for sensitive data
-- **Audit Logging**: Comprehensive activity tracking and compliance reporting
+### Operations
+- Regular database backups
+- Monitor application logs
+- Set up proper monitoring
+- Use Docker for isolation
+- Implement proper CI/CD
 
-### **Security Features**
-- **Input Validation**: All APIs protected with comprehensive input sanitization
-- **Rate Limiting**: Configurable rate limits to prevent abuse
-- **RBAC**: Role-based access control for team collaboration
-- **Container Security**: Minimal attack surface with distroless base images
+## 📚 Documentation
 
-## 🛠️ **Advanced Features**
+- [Deployment Guide](DEPLOYMENT_GUIDE.md) - Detailed deployment instructions
+- [API Documentation](docs/api.md) - API endpoint documentation
+- [Contributing Guide](CONTRIBUTING.md) - How to contribute to the project
+- [Security Policy](SECURITY.md) - Security guidelines and reporting
 
-### **Extensibility**
-- **Custom Agents**: Plugin architecture for domain-specific agents
-- **API Integration**: RESTful APIs for third-party tool integration
-- **Template System**: Configurable project templates and scaffolding
-- **Webhook Support**: Real-time notifications and external system integration
+## 🤝 Contributing
 
-### **Monitoring & Observability**
-- **Health Checks**: Built-in health endpoints for all services
-- **Metrics Collection**: Prometheus-compatible metrics export
-- **Distributed Tracing**: Request tracing across microservices
-- **Log Aggregation**: Centralized logging with structured output
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details on:
+- Code of conduct
+- Development setup
+- Pull request process
+- Coding standards
 
-### **Team Collaboration**
-- **Multi-User Support**: Team workspaces with individual user management
-- **Role-Based Access**: Configurable permissions for different team roles
-- **Real-Time Updates**: WebSocket-based live collaboration features
-- **Notification System**: Email and in-app notifications for important events
-
-## 📚 **Documentation**
-
-### **Platform Guides**
-- [🚀 Quick Start Guide](dev-team-platform/docs/SETUP.md)
-- [🏗️ Architecture Overview](dev-team-platform/docs/ARCHITECTURE.md)
-- [🔧 Configuration Guide](dev-team-platform/docs/CONFIGURATION.md)
-- [🤖 Agent Development](dev-team-platform/docs/AGENT-DEVELOPMENT.md)
-- [🔌 API Reference](dev-team-platform/docs/API.md)
-- [🐳 Deployment Guide](dev-team-platform/docs/DEPLOYMENT.md)
-
-### **Migration & Evolution**
-This platform represents the evolution from the original VS Code extension concept to a full-scale, web-based development platform. While maintaining the core intelligence and agent coordination capabilities, it now provides:
-- **Universal Access**: No longer restricted to VS Code users
-- **Team Scalability**: Multiple users and concurrent projects
-- **Production Deployment**: Enterprise-ready with proper monitoring and scaling
-- **API Integration**: Can be integrated with existing development workflows and tools
-
-## 🤝 **Contributing**
-
-We welcome contributions to the Dev Team Platform! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-### **Development Setup**
-```bash
-git clone https://github.com/cmndcntrlcyber/dev-team.git
-cd dev-team/dev-team-platform
-npm run setup:dev
-npm run test:all
-```
-
-### **Testing**
-```bash
-npm run test:unit        # Unit tests for all services
-npm run test:integration # Integration tests
-npm run test:e2e         # End-to-end tests
-npm run lint:all         # Code quality checks
-npm run security:scan    # Security vulnerability scanning
-```
-
-## 📝 **Changelog**
-
-### **Version 2.0.0** - Platform Release (Current)
-- ✅ Complete microservices architecture with 6 agent services
-- ✅ Web-based dashboard with React frontend
-- ✅ Multi-user support with authentication and authorization
-- ✅ Docker containerization and Docker Compose deployment
-- ✅ API-first design with comprehensive REST APIs
-- ✅ Real-time collaboration with WebSocket support
-- ✅ Production monitoring and observability features
-
-### **Version 1.0.0** - VS Code Extension (Legacy)
-- ✅ Original VS Code extension with embedded agent coordination
-- ✅ Single-user workflow with VS Code UI integration
-- ✅ Local development focus with editor-based interaction
-
-See [CHANGELOG.md](CHANGELOG.md) for detailed release notes.
-
-## 📄 **License**
+## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙋‍♂️ **Support**
+## 🆘 Support
 
-### **Getting Help**
-- [📚 Platform Documentation](https://github.com/cmndcntrlcyber/dev-team/wiki)
-- [💬 GitHub Discussions](https://github.com/cmndcntrlcyber/dev-team/discussions)
-- [🐛 Issue Tracker](https://github.com/cmndcntrlcyber/dev-team/issues)
-- [📧 Email Support](mailto:support@dev-team-platform.com)
+### Getting Help
+- Check the [Deployment Guide](DEPLOYMENT_GUIDE.md) for setup issues
+- Review the application logs for error details
+- Ensure all environment variables are correctly set
+- Verify database connectivity
 
-### **Community**
-- [Discord Community](https://discord.gg/dev-team-platform)
-- [Twitter Updates](https://twitter.com/devteamplatform)
-- [Development Blog](https://blog.dev-team-platform.com)
+### Common Issues
+- **Database Connection**: Check PostgreSQL service and credentials
+- **Port Conflicts**: Ensure port 5000 is available
+- **AI Integration**: Verify API keys are valid and have sufficient credits
+- **Docker Issues**: Ensure Docker daemon is running
 
-## 🌟 **Acknowledgments**
+### Community
+- Create an issue for bug reports
+- Submit feature requests via GitHub issues
+- Join discussions in the repository
 
-Built with modern technologies:
-- [Docker](https://docker.com) - Containerization platform
-- [React](https://reactjs.org) - Frontend framework
-- [Node.js](https://nodejs.org) - Server runtime
-- [PostgreSQL](https://postgresql.org) - Primary database
-- [Redis](https://redis.io) - Caching and session management
-- [NATS](https://nats.io) - Message broker for microservices
-- [Anthropic Claude](https://www.anthropic.com) - AI agent intelligence
-- [Model Context Protocol](https://modelcontextprotocol.io) - External tool integration
+## 🔮 Roadmap
+
+### Upcoming Features
+- **Advanced Reporting**: Enhanced report generation and export
+- **Team Collaboration**: Multi-user operations and collaboration
+- **API Integrations**: Extended third-party tool integrations
+- **Mobile App**: Mobile companion application
+- **Cloud Deployment**: One-click cloud deployment options
+
+### Future Enhancements
+- **Machine Learning**: Predictive analytics and pattern recognition
+- **Advanced AI**: Custom AI model training and deployment
+- **Enterprise Features**: SSO, RBAC, and enterprise security
+- **Plugin System**: Extensible plugin architecture
 
 ---
 
-**Built with ❤️ by the Dev Team Platform community**
+**Attack Node** - Empowering red team operations with intelligent automation and seamless tool integration.
 
-*Empowering development teams with intelligent AI collaboration*
+*Built with ❤️ by the security community*

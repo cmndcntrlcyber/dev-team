@@ -1,0 +1,133 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: attack_node
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Optional: Development database management
+  adminer:
+    image: adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+
+  # Security Tools
+  attacknode-kali:
+    image: kasmweb/kali-rolling-desktop:develop
+    restart: unless-stopped
+    ports:
+      - "6902:6901"
+    environment:
+      VNC_PW: password
+      KASM_USER: root
+      KASM_UID: 0
+      KASM_GID: 0
+    volumes:
+      - ./uploads/kasm_profiles/kali-root:/home/kasm-user:rw
+      - ./uploads/docker:/home/kasm-user/shared:rw
+    privileged: true
+    cap_add:
+      - SYS_ADMIN
+    shm_size: 512m
+    hostname: kasm
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6901/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  attacknode-vscode:
+    image: kasmweb/vs-code:1.17.0
+    restart: unless-stopped
+    ports:
+      - "6903:6901"
+    environment:
+      VNC_PW: password
+    volumes:
+      - ./uploads/docker:/home/kasm-user/shared:rw
+    shm_size: 512m
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6901/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  empire-data:
+    image: bcsecurity/empire:latest
+    restart: "no"
+    volumes:
+      - empire_data:/empire
+    command: ["true"]
+
+  attacknode-empire:
+    image: bcsecurity/empire:latest
+    restart: unless-stopped
+    ports:
+      - "1337:1337"
+      - "5000:5000"
+    volumes_from:
+      - empire-data
+    depends_on:
+      - empire-data
+    stdin_open: true
+    tty: true
+    healthcheck:
+      test: ["CMD", "pgrep", "-f", "empire"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  attacknode-maltego:
+    image: kasmweb/maltego:1.17.0-rolling-daily
+    restart: unless-stopped
+    ports:
+      - "6904:6901"
+    environment:
+      VNC_PW: password
+    shm_size: 512m
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6901/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  postgres_data:
+  redis_data:
+  empire_data:
