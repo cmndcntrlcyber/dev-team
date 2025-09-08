@@ -32,7 +32,7 @@ RUN apk add --no-cache \
 
 # Create app user
 RUN addgroup -g 1001 -S nodejs
-RUN adduser -S attacknode -u 1001
+RUN adduser -S devteam -u 1001
 
 WORKDIR /app
 
@@ -47,10 +47,10 @@ COPY --from=builder /app/dist ./dist
 
 # Create necessary directories
 RUN mkdir -p uploads postgres-data redis-data && \
-    chown -R attacknode:nodejs uploads postgres-data redis-data
+    chown -R devteam:nodejs uploads postgres-data redis-data
 
 # Switch to non-root user
-USER attacknode
+USER devteam
 
 # Expose port
 EXPOSE 5000
