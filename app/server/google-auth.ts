@@ -90,7 +90,7 @@ export async function setupGoogleAuth(app: Express) {
   };
 
   const redirectUri = process.env.NODE_ENV === "production" 
-    ? `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}/api/auth/google/callback`
+    ? `${process.env.BASE_URL || "https://your-domain.com"}/api/auth/google/callback`
     : "http://localhost:5000/api/auth/google/callback";
 
   const strategy = new Strategy(
