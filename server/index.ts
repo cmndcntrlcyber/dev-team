@@ -248,13 +248,19 @@ app.use((req, res, next) => {
   */
   log("Docker health monitoring disabled - Docker is not available in this environment");
   
-  // Initialize Agent Connector for dev-team containers
-  try {
-    log("Initializing Agent Connector for dev-team containers...");
-    await agentConnector.initialize();
-    log("Agent Connector initialized successfully");
-  } catch (error) {
-    log(`Warning: Failed to initialize Agent Connector: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  // Initialize Agent Connector for dev-team containers (only if enabled)
+  const enableAgentContainers = process.env.ENABLE_AGENT_CONTAINERS === 'true';
+  
+  if (enableAgentContainers) {
+    try {
+      log("Initializing Agent Connector for dev-team containers...");
+      await agentConnector.initialize();
+      log("Agent Connector initialized successfully");
+    } catch (error) {
+      log(`Warning: Failed to initialize Agent Connector: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  } else {
+    log("Agent Connector disabled - running in single-app mode (ENABLE_AGENT_CONTAINERS=false)");
   }
 
   // Setup graceful shutdown
@@ -265,8 +271,10 @@ app.use((req, res, next) => {
       // Docker service disabled
       // await dockerService.gracefulShutdown();
       
-      // Destroy agent connector
-      agentConnector.destroy();
+      // Destroy agent connector (only if it was initialized)
+      if (enableAgentContainers) {
+        agentConnector.destroy();
+      }
       
       // Close the server
       server.close(() => {

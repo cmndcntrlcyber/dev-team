@@ -23,18 +23,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      // If Google OAuth is not configured, return a mock user for development
+      // If Google OAuth is not configured, create/return a mock user for development
       if (!process.env.GOOGLE_CLIENT_ID) {
-        return res.json({
-          id: 'dev-user',
-          username: 'developer',
-          email: 'dev@example.com',
-          firstName: 'Developer',
-          lastName: 'User',
-          profileImageUrl: null,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        });
+        const devUserId = 'dev-user';
+        let user = await storage.getUser(devUserId);
+        
+        if (!user) {
+          // Create the dev user if it doesn't exist
+          user = await storage.createUser({
+            id: devUserId,
+            username: 'developer',
+            email: 'dev@example.com',
+            firstName: 'Developer',
+            lastName: 'User'
+          });
+        }
+        
+        return res.json(user);
       }
       
       const userId = req.user.claims.sub;
@@ -297,6 +302,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Integration status route
+  app.get("/api/integrations/status", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub || 'dev-user';
+      
+      // Get API configuration to check if keys are set
+      const apiConfig = await storage.getGlobalConfig(userId, 'api');
+      const apiConfigData = apiConfig?.configData || {};
+      
+      // Check OpenAI status
+      const openaiStatus = {
+        name: "OpenAI",
+        description: "GPT-4 API for AI features",
+        status: apiConfigData.openaiApiKey ? "connected" : "disconnected",
+        hasApiKey: !!apiConfigData.openaiApiKey
+      };
+      
+      // Check Anthropic status  
+      const anthropicStatus = {
+        name: "Anthropic",
+        description: "Claude AI for multi-agent workflows", 
+        status: apiConfigData.anthropicApiKey ? "connected" : "disconnected",
+        hasApiKey: !!apiConfigData.anthropicApiKey
+      };
+      
+      // Check Burp Suite status
+      let burpStatus = {
+        name: "Burp Suite",
+        description: "Web application security testing",
+        status: "disconnected",
+        endpoint: apiConfigData.burpEndpoint || "http://localhost:1337"
+      };
+      
+      try {
+        const controller = new AbortController();
+        setTimeout(() => controller.abort(), 3000);
+        
+        const burpResponse = await fetch(`${burpStatus.endpoint}/health`, { 
+          signal: controller.signal
+        });
+        if (burpResponse.ok || burpResponse.status === 404) {
+          burpStatus.status = "connected";
+        }
+      } catch (error) {
+        // Keep as disconnected
+      }
+      
+      // Check Kali Linux status  
+      const kaliStatus = {
+        name: "Kali Linux",
+        description: "Penetration testing environment",
+        status: "running" as const
+      };
+      
+      res.json({
+        openai: openaiStatus,
+        anthropic: anthropicStatus,
+        burp: burpStatus,
+        kali: kaliStatus
+      });
+    } catch (error) {
+      console.error("Error fetching integration status:", error);
+      res.status(500).json({ message: "Failed to fetch integration status" });
+    }
+  });
+
   // Global configuration routes
   app.get("/api/config/:type", isAuthenticated, async (req: any, res) => {
     try {
@@ -314,9 +385,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user?.claims?.sub || 'dev-user';
       const configType = req.params.type;
       const configData = req.body;
-      const config = await storage.saveGlobalConfig(userId, configType, configData);
+      const config = await storage.saveGlobalConfig({
+        userId,
+        configType,
+        configData
+      });
       res.json(config);
     } catch (error) {
+      console.error("Error saving configuration:", error);
       res.status(500).json({ message: "Failed to save configuration" });
     }
   });

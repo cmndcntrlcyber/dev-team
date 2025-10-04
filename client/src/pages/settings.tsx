@@ -26,6 +26,112 @@ import {
   Monitor
 } from "lucide-react";
 
+// Integration Status Component
+function IntegrationStatusList() {
+  const { data: integrationStatus, refetch } = useQuery({
+    queryKey: ['/api/integrations/status'],
+    queryFn: async () => {
+      const response = await fetch('/api/integrations/status');
+      if (response.ok) {
+        return response.json();
+      }
+      return {};
+    },
+    refetchInterval: 30000 // Refresh every 30 seconds
+  });
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "connected":
+        return <div className="bg-green-500/20 text-green-400 px-2 py-1 rounded text-xs">Connected</div>;
+      case "running":
+        return <div className="bg-blue-500/20 text-blue-400 px-2 py-1 rounded text-xs">Running</div>;
+      case "disconnected":
+      default:
+        return <div className="bg-red-500/20 text-red-400 px-2 py-1 rounded text-xs">Disconnected</div>;
+    }
+  };
+
+  const getIcon = (name: string) => {
+    switch (name) {
+      case "OpenAI":
+      case "Anthropic":
+        return <Globe className="h-5 w-5 text-primary mr-3" />;
+      case "Burp Suite":
+        return <Shield className="h-5 w-5 text-secondary mr-3" />;
+      case "Kali Linux":
+        return <Monitor className="h-5 w-5 text-warning mr-3" />;
+      default:
+        return <Globe className="h-5 w-5 text-gray-400 mr-3" />;
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {integrationStatus?.openai && (
+        <div className="flex items-center justify-between p-3 bg-card rounded-lg">
+          <div className="flex items-center">
+            {getIcon(integrationStatus.openai.name)}
+            <div>
+              <p className="text-gray-100 font-medium">{integrationStatus.openai.name}</p>
+              <p className="text-gray-400 text-sm">{integrationStatus.openai.description}</p>
+            </div>
+          </div>
+          {getStatusBadge(integrationStatus.openai.status)}
+        </div>
+      )}
+
+      {integrationStatus?.anthropic && (
+        <div className="flex items-center justify-between p-3 bg-card rounded-lg">
+          <div className="flex items-center">
+            {getIcon(integrationStatus.anthropic.name)}
+            <div>
+              <p className="text-gray-100 font-medium">{integrationStatus.anthropic.name}</p>
+              <p className="text-gray-400 text-sm">{integrationStatus.anthropic.description}</p>
+            </div>
+          </div>
+          {getStatusBadge(integrationStatus.anthropic.status)}
+        </div>
+      )}
+
+      {integrationStatus?.burp && (
+        <div className="flex items-center justify-between p-3 bg-card rounded-lg">
+          <div className="flex items-center">
+            {getIcon(integrationStatus.burp.name)}
+            <div>
+              <p className="text-gray-100 font-medium">{integrationStatus.burp.name}</p>
+              <p className="text-gray-400 text-sm">{integrationStatus.burp.description}</p>
+            </div>
+          </div>
+          {getStatusBadge(integrationStatus.burp.status)}
+        </div>
+      )}
+
+      {integrationStatus?.kali && (
+        <div className="flex items-center justify-between p-3 bg-card rounded-lg">
+          <div className="flex items-center">
+            {getIcon(integrationStatus.kali.name)}
+            <div>
+              <p className="text-gray-100 font-medium">{integrationStatus.kali.name}</p>
+              <p className="text-gray-400 text-sm">{integrationStatus.kali.description}</p>
+            </div>
+          </div>
+          {getStatusBadge(integrationStatus.kali.status)}
+        </div>
+      )}
+      
+      <Button 
+        variant="outline" 
+        onClick={() => refetch()}
+        className="border-gray-600 text-gray-300 w-full mt-4"
+      >
+        <RefreshCw className="h-4 w-4 mr-2" />
+        Refresh Status
+      </Button>
+    </div>
+  );
+}
+
 export default function Settings() {
   const { toast } = useToast();
   const [notifications, setNotifications] = useState({
@@ -363,51 +469,7 @@ export default function Settings() {
                 <CardTitle className="text-lg font-semibold text-gray-100">Integration Status</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-3 bg-card rounded-lg">
-                    <div className="flex items-center">
-                      <Globe className="h-5 w-5 text-primary mr-3" />
-                      <div>
-                        <p className="text-gray-100 font-medium">OpenAI</p>
-                        <p className="text-gray-400 text-sm">GPT-4 API for AI features</p>
-                      </div>
-                    </div>
-                    <div className="bg-success text-success px-2 py-1 rounded text-xs">Connected</div>
-                  </div>
-
-                  <div className="flex items-center justify-between p-3 bg-card rounded-lg">
-                    <div className="flex items-center">
-                      <Globe className="h-5 w-5 text-primary mr-3" />
-                      <div>
-                        <p className="text-gray-100 font-medium">Anthropic</p>
-                        <p className="text-gray-400 text-sm">Claude AI for multi-agent workflows</p>
-                      </div>
-                    </div>
-                    <div className="bg-success text-success px-2 py-1 rounded text-xs">Connected</div>
-                  </div>
-
-                  <div className="flex items-center justify-between p-3 bg-card rounded-lg">
-                    <div className="flex items-center">
-                      <Shield className="h-5 w-5 text-secondary mr-3" />
-                      <div>
-                        <p className="text-gray-100 font-medium">Burp Suite</p>
-                        <p className="text-gray-400 text-sm">Web application security testing</p>
-                      </div>
-                    </div>
-                    <div className="bg-error text-error px-2 py-1 rounded text-xs">Disconnected</div>
-                  </div>
-
-                  <div className="flex items-center justify-between p-3 bg-card rounded-lg">
-                    <div className="flex items-center">
-                      <Monitor className="h-5 w-5 text-warning mr-3" />
-                      <div>
-                        <p className="text-gray-100 font-medium">Kali Linux</p>
-                        <p className="text-gray-400 text-sm">Penetration testing environment</p>
-                      </div>
-                    </div>
-                    <div className="bg-success text-success px-2 py-1 rounded text-xs">Running</div>
-                  </div>
-                </div>
+                <IntegrationStatusList />
               </CardContent>
             </Card>
           </TabsContent>
