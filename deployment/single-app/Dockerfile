@@ -11,10 +11,9 @@ WORKDIR /app
 
 # Copy app package files
 COPY app/package*.json ./
-COPY app/package-lock.json ./
 
 # Install dependencies
-RUN npm ci --production=false
+RUN npm install --production=false
 
 # Copy app source code
 COPY app/ .
@@ -39,13 +38,18 @@ WORKDIR /app
 
 # Copy app package files
 COPY app/package*.json ./
-COPY app/package-lock.json ./
 
-# Install only production dependencies
-RUN npm ci --production=true && npm cache clean --force
+# Copy all dependencies from builder (includes vite and other devDependencies needed at runtime)
+COPY --from=builder /app/node_modules ./node_modules
 
 # Copy built application
 COPY --from=builder /app/dist ./dist
+
+# Copy shared schema for database migrations
+COPY --from=builder /app/shared ./shared
+
+# Copy drizzle config for database migrations
+COPY --from=builder /app/drizzle.config.ts ./drizzle.config.ts
 
 # Create necessary directories
 RUN mkdir -p uploads postgres-data redis-data && \
@@ -61,5 +65,5 @@ EXPOSE 5000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:5000/health || exit 1
 
-# Start the application
-CMD ["npm", "start"]
+# Start the application with database setup
+CMD ["sh", "-c", "npm run db:push && npm start"]
