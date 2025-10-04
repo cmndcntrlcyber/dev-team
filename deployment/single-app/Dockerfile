@@ -9,14 +9,15 @@ RUN apk add --no-cache \
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Copy app package files
+COPY app/package*.json ./
+COPY app/package-lock.json ./
 
 # Install dependencies
 RUN npm ci --production=false
 
-# Copy source code
-COPY . .
+# Copy app source code
+COPY app/ .
 
 # Build the application
 RUN npm run build
@@ -36,8 +37,9 @@ RUN adduser -S devteam -u 1001
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Copy app package files
+COPY app/package*.json ./
+COPY app/package-lock.json ./
 
 # Install only production dependencies
 RUN npm ci --production=true && npm cache clean --force
