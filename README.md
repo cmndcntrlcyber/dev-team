@@ -1,8 +1,8 @@
 # Dev Team Platform
 
-**AI-Powered Multi-Agent Development Platform**
+**AI-Powered Multi-Agent Development Platform - Unified Monorepo**
 
-A comprehensive platform that coordinates specialized AI agents to build, test, and deploy your projects with intelligent collaboration and human oversight. Built as a modern single-application architecture with integrated agent orchestration.
+A comprehensive platform that coordinates specialized AI agents to build, test, and deploy your projects with intelligent collaboration and human oversight. Choose between **Simple Mode** for quick deployment or **Platform Mode** for enterprise-scale microservices architecture.
 
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Node.js](https://img.shields.io/badge/runtime-node.js-green)](https://nodejs.org)
@@ -10,506 +10,473 @@ A comprehensive platform that coordinates specialized AI agents to build, test, 
 
 ## 🌟 Overview
 
-The Dev Team Platform is an AI-powered development assistant that coordinates specialized agents to help teams build applications efficiently. The platform features a modern React-based dashboard with real-time agent monitoring and intelligent task distribution.
+The Dev Team Platform transforms AI-powered development collaboration into a scalable, intelligent system that adapts to your needs - from solo development to enterprise teams.
 
-### 🏗️ **Architecture**
+### 🚀 **Two Deployment Models**
 
-- **Single Application**: Integrated Express.js server on port 5000
-- **Frontend**: React 18 with TypeScript and Tailwind CSS
-- **Backend**: Express.js with REST API endpoints
-- **Database**: PostgreSQL for data persistence
-- **Agent System**: 6 specialized AI agents with health monitoring and mock mode
+**🔹 Simple Mode** - Perfect for getting started
+- Single integrated application (Port 5000)
+- React frontend + Express backend + integrated agents
+- Mock mode for development without API keys
+- Quick Docker deployment with PostgreSQL
+- **Ideal for**: Solo developers, small teams, rapid prototyping
 
-## ✨ Features
+**🔹 Platform Mode** - Enterprise-ready microservices
+- Full microservices architecture with 15+ services
+- 6 specialized AI agents as individual microservices
+- Production infrastructure (PostgreSQL, Redis, NATS)
+- Real-time monitoring and health checks
+- **Ideal for**: Production deployments, large teams, scalable systems
 
-### 🤖 **6 Specialized AI Agents**
-- **Architecture Lead**: Project coordination, technology decisions, system design
-- **Frontend Core**: React/Vue/Angular components, UI/UX development
-- **Backend Integration**: APIs, databases, authentication, server-side logic
-- **Quality Assurance**: Testing strategies, code quality, security validation
-- **DevOps Engineer**: CI/CD pipelines, containerization, deployment automation
-- **MCP Integration**: Model Context Protocol servers, external integrations
+## 🚀 Quick Start
 
-### 🧠 **Intelligent Coordination**
-- **Real-time Monitoring**: Live agent status and health checks
-- **Mock Development Mode**: Full functionality without external dependencies
-- **Task Distribution**: AI-powered assignment based on agent capabilities
-- **Web Dashboard**: Intuitive interface for project and agent management
-- **Performance Metrics**: CPU, memory, and response time monitoring
+### 🔹 **Simple Mode (Recommended for New Users)**
 
-### 🚀 **Production Ready**
-- **Single Port Deployment**: Everything runs on port 5000
-- **Database Agnostic**: Connect to any PostgreSQL instance
-- **Session Management**: Secure authentication and user sessions
-- **Real-time Updates**: Live agent status and task progress
-- **Auto-Recovery**: Automatic agent reconnection and error handling
-
-## 📦 Deployment Options
-
-### 🐳 **Docker Deployment**
-
-Deploy using Docker for any container orchestration platform:
+Get started in under 5 minutes:
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/dev-team-platform.git
-cd dev-team-platform
+git clone https://github.com/cmndcntrlcyber/dev-team.git
+cd dev-team
 
-# Build Docker image
-docker build -t dev-team-platform .
+# Option 1: Docker (Recommended)
+docker compose -f docker-compose.simple.yml up
 
-# Run container with environment variables
-docker run -d \
-  -p 5000:5000 \
-  -e DATABASE_URL="postgresql://user:password@host:port/database" \
-  -e ANTHROPIC_API_KEY="your-anthropic-key" \
-  -e SESSION_SECRET="your-secure-session-secret" \
-  --name dev-team \
-  dev-team-platform
+# Option 2: Local Development
+npm run setup
+npm run dev:app
 
-# Access the platform
+# Access the application
 open http://localhost:5000
 ```
 
-#### Docker Compose Example:
-```yaml
-version: '3.8'
-services:
-  app:
-    build: .
-    ports:
-      - "5000:5000"
-    environment:
-      DATABASE_URL: postgresql://user:password@postgres:5432/devteam
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
-      SESSION_SECRET: ${SESSION_SECRET}
-    depends_on:
-      - postgres
-  
-  postgres:
-    image: postgres:15
-    environment:
-      POSTGRES_DB: devteam
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+**Environment Setup (Optional):**
+```bash
+# Copy environment template
+cp .env.example .env
 
-volumes:
-  postgres_data:
+# Edit .env with your API keys (optional - runs in mock mode without them)
+ANTHROPIC_API_KEY=your-key-here
+SESSION_SECRET=your-session-secret
 ```
 
-### 💻 **Local Development**
+### 🔹 **Platform Mode (Full Microservices)**
 
-Run locally for development and testing:
+For production-ready deployments:
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/dev-team-platform.git
-cd dev-team-platform
+git clone https://github.com/cmndcntrlcyber/dev-team.git
+cd dev-team
 
-# Install dependencies
-npm install
-
-# Set up environment variables
+# Configure environment (required for platform mode)
 cp .env.example .env
 # Edit .env with your configuration
 
-# Start development server with hot reload
-npm run dev
+# Deploy all services
+docker compose -f docker-compose.microservices.yml up
 
-# Access the platform
-open http://localhost:5000
+# Access the dashboard
+open http://localhost:3000
 ```
 
-#### Development Features:
-- Hot module replacement for instant updates
-- Mock agent mode for testing without API keys
-- Detailed logging and debugging output
-- Automatic TypeScript compilation
-
-### 🖥️ **Self-Hosted Deployment**
-
-Deploy on VPS, dedicated servers, or bare metal:
-
+**Required Environment Variables for Platform Mode:**
 ```bash
-# On your server
-# Clone the repository
-git clone https://github.com/your-username/dev-team-platform.git
-cd dev-team-platform
-
-# Install production dependencies only
-npm install --production
-
-# Build the application
-npm run build
-
-# Set environment variables
-export DATABASE_URL="postgresql://user:password@localhost:5432/devteam"
-export ANTHROPIC_API_KEY="your-anthropic-key"
-export SESSION_SECRET="your-secure-session-secret"
-export NODE_ENV="production"
-export PORT=5000
-
-# Start the production server
-npm start
-
-# Or use PM2 for process management
-npm install -g pm2
-pm2 start npm --name "dev-team" -- start
-pm2 save
-pm2 startup
-```
-
-#### System Requirements:
-- Node.js 18.0 or higher
-- PostgreSQL 13 or higher
-- 2GB RAM minimum (4GB recommended)
-- 10GB disk space
-
-#### Nginx Reverse Proxy Configuration:
-```nginx
-server {
-    listen 80;
-    server_name your-domain.com;
-
-    location / {
-        proxy_pass http://localhost:5000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-```
-
-## ⚙️ Configuration
-
-### **Environment Variables**
-
-Create a `.env` file with the following configuration:
-
-```bash
-# Database Configuration (Required)
-DATABASE_URL=postgresql://user:password@localhost:5432/devteam
-
-# AI Integration (Optional - runs in mock mode without these)
 ANTHROPIC_API_KEY=your-anthropic-key
-OPENAI_API_KEY=your-openai-key
-
-# Server Configuration
-PORT=5000
-NODE_ENV=production
-SESSION_SECRET=your-secure-session-secret-min-32-chars
-
-# Authentication (Optional)
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
-
-# Agent Configuration (Optional)
-AGENT_HEALTH_CHECK_INTERVAL=10000  # milliseconds
-AGENT_MAX_RECONNECT_ATTEMPTS=5
-AGENT_RECONNECT_DELAY=5000         # milliseconds
-AGENT_TIMEOUT=60000                 # milliseconds
-
-# Custom Agent Endpoints (Optional - for external agent containers)
-ARCHITECTURE_AGENT_URL=http://localhost:3010
-FRONTEND_AGENT_URL=http://localhost:3011
-BACKEND_AGENT_URL=http://localhost:3012
-QA_AGENT_URL=http://localhost:3013
-DEVOPS_AGENT_URL=http://localhost:3014
-MCP_AGENT_URL=http://localhost:3015
+JWT_SECRET=your-jwt-secret
+DATABASE_URL=postgresql://user:password@postgres:5432/dev_team_platform
 ```
 
-### **Database Setup**
+## 📋 **Choosing Your Deployment Model**
 
-```sql
--- Create database
-CREATE DATABASE devteam;
+| Feature | Simple Mode | Platform Mode |
+|---------|-------------|---------------|
+| **Setup Time** | 5 minutes | 15-30 minutes |
+| **Resource Usage** | Low (1-2 GB RAM) | High (4-8 GB RAM) |
+| **Scalability** | Single server | Horizontally scalable |
+| **Development** | Integrated agents | Distributed agents |
+| **Monitoring** | Basic logging | Full observability |
+| **Team Size** | 1-5 developers | 5-50+ developers |
+| **Production Ready** | ✅ Small-scale | ✅ Enterprise-scale |
 
--- Grant privileges
-GRANT ALL PRIVILEGES ON DATABASE devteam TO your_user;
-```
+### **Migration Path**
 
-The application will automatically run migrations on startup.
+Start with Simple Mode and upgrade to Platform Mode as you grow:
 
-## 🏗️ System Architecture
+1. **Develop** with Simple Mode for rapid iteration
+2. **Export** your projects and configurations
+3. **Deploy** Platform Mode for production
+4. **Import** your work into the distributed system
 
-### **Application Structure**
-```
-┌────────────────────────────────────┐
-│      Dev Team Platform             │
-│         (Port 5000)                │
-├────────────────────────────────────┤
-│    Express.js Server               │
-│    ├── REST API                    │
-│    ├── Static File Serving         │
-│    └── WebSocket Support           │
-├────────────────────────────────────┤
-│    React Frontend (SPA)            │
-│    ├── Dashboard UI                │
-│    ├── Agent Monitoring            │
-│    └── Project Management          │
-├────────────────────────────────────┤
-│    Agent Connector Service         │
-│    ├── 6 AI Agents                 │
-│    ├── Health Monitoring           │
-│    └── Mock/Real Mode Toggle       │
-├────────────────────────────────────┤
-│    PostgreSQL Database             │
-│    ├── User Management             │
-│    ├── Project Storage             │
-│    └── Session Store               │
-└────────────────────────────────────┘
-```
+## 🤖 **AI Agent Capabilities**
 
-### **Agent System Architecture**
-- **Integrated Connector**: Single service managing all agents
-- **Health Monitoring**: Automatic health checks every 10 seconds
-- **Mock Mode**: Development mode without external dependencies
-- **Real Mode**: Production mode with AI service connections
-- **Auto-Recovery**: Automatic reconnection on failure
+Both deployment modes include 6 specialized AI agents:
 
-## 🤖 Agent Capabilities
-
-### **Architecture Lead**
-- Project planning and technical coordination
+### **🏗️ Architecture Agent**
+- Project coordination and technical leadership
 - Technology stack analysis and recommendations
 - System architecture design and validation
 - Code review and quality oversight
-- Integration coordination between agents
 
-### **Frontend Core**
-- Modern UI/UX development with React/Vue/Angular
+### **🎨 Frontend Agent** 
+- Modern UI/UX development (React/Vue/Angular)
 - Responsive design with Tailwind CSS/Material-UI
-- State management (Redux, Zustand, Context API)
-- API integration and data fetching
+- State management and API integration
 - Performance optimization and accessibility
 
-### **Backend Integration**
-- Server-side development with Express/FastAPI/NestJS
+### **⚙️ Backend Agent**
+- Server-side development (Express/FastAPI/NestJS)
 - Database schema design and migrations
 - Authentication systems (JWT, OAuth, RBAC)
 - API documentation and testing
-- Microservices architecture when needed
 
-### **Quality Assurance**
+### **🔍 QA Agent**
 - Unit, integration, and E2E test generation
 - Code quality analysis and standards enforcement
 - Security vulnerability scanning
 - Performance testing and benchmarking
-- Accessibility validation
 
-### **DevOps Engineer**
+### **🚀 DevOps Agent**
 - CI/CD pipeline creation and management
-- Docker containerization
-- Infrastructure as code
-- Monitoring and logging setup
-- Deployment automation
+- Docker containerization and optimization
+- Infrastructure as code and cloud deployment
+- Monitoring, logging, and alerting setup
 
-### **MCP Integration**
+### **🔌 MCP Agent**
 - Model Context Protocol server development
-- External API integration
-- Custom tool creation
-- Plugin architecture
+- External API integration and custom tools
+- Plugin architecture development
 - Documentation generation
 
-## 📊 Dashboard Features
+## ⚡ **Simple Mode Features**
 
-### **Agent Monitoring**
-- Real-time agent status (Ready/Mock/Offline)
-- Performance metrics visualization
-- Health check history
-- Task assignment tracking
-- Error logs and debugging
+- **Integrated Experience**: All agents run within single application
+- **Mock Development**: Full functionality without external dependencies
+- **Real-time Dashboard**: Live agent status and project management
+- **One-Command Deployment**: Docker or local development
+- **Auto-Recovery**: Automatic agent reconnection and error handling
 
-### **Project Management**
-- Create and organize projects
-- File upload and management
-- Task creation and assignment
-- Progress tracking
-- Team collaboration
-
-### **System Administration**
-- User authentication management
-- System configuration
-- API key management
-- Performance monitoring
-- Activity logs
-
-## 🔄 Development Workflow
-
-### **Getting Started**
-1. Clone the repository
-2. Install dependencies: `npm install`
-3. Configure environment variables
-4. Set up PostgreSQL database
-5. Run development server: `npm run dev`
-
-### **Agent Development Mode**
-The platform automatically handles agent connectivity:
-
-- **Mock Mode**: Simulates agent responses when API keys are not configured
-- **Real Mode**: Connects to actual AI services when configured
-- **Hybrid Mode**: Mix of real and mock agents based on availability
-- **Auto-Recovery**: Automatic mode switching on service availability
-
-### **Building for Production**
 ```bash
-# Build the application
-npm run build
-
-# Run production build
-npm start
+# Simple Mode Commands
+npm run dev:app              # Start development server
+npm run docker:simple        # Docker deployment
+npm run build               # Build for production
 ```
 
-## 🔒 Security & Privacy
+## 🏢 **Platform Mode Features**
+
+- **Microservices Architecture**: Each agent as independent service
+- **Production Infrastructure**: PostgreSQL, Redis, NATS messaging
+- **Health Monitoring**: Comprehensive health checks and metrics
+- **Horizontal Scaling**: Scale individual services based on load
+- **Team Collaboration**: Multi-user support with role-based access
+
+```bash
+# Platform Mode Commands
+npm run dev:platform         # Start all services in development
+npm run docker:platform      # Full platform deployment
+npm run build --workspaces   # Build all services
+npm run test --workspaces    # Run all tests
+```
+
+### **Platform Mode Architecture**
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    API Gateway (Port 3000)             │
+├─────────────────────────────────────────────────────────┤
+│  Core Services          │  Agent Services              │
+│  ├── Orchestrator       │  ├── Architecture (3010)     │
+│  ├── Project Service    │  ├── Frontend (3011)         │
+│  ├── Task Service       │  ├── Backend (3012)          │
+│  └── Auth Service       │  ├── QA (3013)               │
+│                         │  ├── DevOps (3014)           │
+│                         │  └── MCP (3015)              │
+├─────────────────────────────────────────────────────────┤
+│  Infrastructure                                         │
+│  ├── PostgreSQL (5432)  ├── Redis (6379)               │
+│  └── NATS (4222)        └── Monitoring (9090)          │
+└─────────────────────────────────────────────────────────┘
+```
+
+## 🛠️ **Development**
+
+### **Workspace Structure**
+
+```
+dev-team/
+├── README.md                          # This file
+├── package.json                       # Workspace configuration
+├── docker-compose.simple.yml          # Simple mode deployment
+├── docker-compose.microservices.yml   # Platform mode deployment
+├── .env.example                       # Environment template
+├── app/                              # Simple mode application
+│   ├── client/                       # React frontend
+│   ├── server/                       # Express backend
+│   └── shared/                       # Shared schemas
+├── services/                         # Platform mode services
+│   ├── api-gateway/                  # Main entry point
+│   ├── orchestrator-service/         # Agent coordination
+│   ├── project-service/              # Project management
+│   ├── task-service/                 # Task assignment
+│   ├── auth-service/                 # Authentication
+│   └── agents/                       # AI agent services
+│       ├── architecture/
+│       ├── frontend/
+│       ├── backend/
+│       ├── qa/
+│       ├── devops/
+│       └── mcp/
+├── shared/                           # Shared packages
+│   ├── types/                        # TypeScript definitions
+│   └── utils/                        # Common utilities
+├── deployment/                       # Deployment configurations
+│   ├── single-app/                   # Simple mode Docker
+│   └── microservices/                # Platform mode configs
+├── infrastructure/                   # Database and monitoring
+└── docs/                            # Comprehensive documentation
+```
+
+### **Development Commands**
+
+```bash
+# Install all dependencies
+npm run setup
+
+# Development
+npm run dev:app                 # Simple mode development
+npm run dev:platform            # Platform mode development
+
+# Testing
+npm run test                    # Run all tests
+npm run lint                    # Lint all code
+npm run check                   # Type checking
+
+# Building
+npm run build                   # Build all workspaces
+npm run build:shared            # Build shared packages only
+
+# Docker
+npm run docker:simple           # Simple mode Docker
+npm run docker:platform         # Platform mode Docker  
+npm run docker:clean            # Clean all containers and volumes
+```
+
+## ⚙️ **Configuration**
+
+### **Environment Variables**
+
+```bash
+# =================================
+# DEPLOYMENT MODE
+# =================================
+DEPLOYMENT_MODE=simple          # or "platform"
+
+# =================================
+# SIMPLE MODE
+# =================================
+PORT=5000
+DATABASE_URL=postgresql://user:password@localhost:5432/devteam
+SESSION_SECRET=your-session-secret-min-32-chars
+
+# =================================
+# PLATFORM MODE
+# =================================
+# JWT & Authentication
+JWT_SECRET=your-jwt-secret
+JWT_EXPIRES_IN=15m
+REFRESH_TOKEN_EXPIRES_IN=7d
+
+# Infrastructure
+DATABASE_URL=postgresql://devteam:password@postgres:5432/dev_team_platform
+REDIS_URL=redis://redis:6379
+NATS_URL=nats://nats:4222
+
+# =================================
+# AI SERVICES (BOTH MODES)
+# =================================
+ANTHROPIC_API_KEY=your-anthropic-key
+OPENAI_API_KEY=your-openai-key-optional
+TAVILY_API_KEY=your-tavily-key-optional
+
+# =================================
+# OPTIONAL INTEGRATIONS
+# =================================
+GITHUB_CLIENT_ID=your-github-id
+GITHUB_CLIENT_SECRET=your-github-secret
+GOOGLE_CLIENT_ID=your-google-id
+GOOGLE_CLIENT_SECRET=your-google-secret
+
+# =================================
+# DEVELOPMENT
+# =================================
+NODE_ENV=development
+LOG_LEVEL=info
+```
+
+### **Agent Configuration**
+
+Both modes support agent customization:
+
+```json
+{
+  "agents": {
+    "architecture": { "enabled": true, "maxConcurrentTasks": 2 },
+    "frontend": { "enabled": true, "maxConcurrentTasks": 3 },
+    "backend": { "enabled": true, "maxConcurrentTasks": 3 },
+    "qa": { "enabled": true, "maxConcurrentTasks": 4 },
+    "devops": { "enabled": true, "maxConcurrentTasks": 2 },
+    "mcp": { "enabled": true, "maxConcurrentTasks": 2 }
+  },
+  "qualityGates": {
+    "testCoverage": 85,
+    "codeQuality": 8.0,
+    "securityScan": true,
+    "performanceCheck": true
+  }
+}
+```
+
+## 📈 **Performance & Scaling**
+
+### **Simple Mode Performance**
+- **Startup Time**: <30 seconds
+- **Memory Usage**: 1-2 GB RAM
+- **Concurrent Users**: 10-50
+- **Agent Response**: <3 seconds average
+- **Database**: Single PostgreSQL instance
+
+### **Platform Mode Performance**
+- **Startup Time**: 60-120 seconds (all services)
+- **Memory Usage**: 4-8 GB RAM (distributed)
+- **Concurrent Users**: 100-1000+
+- **Agent Response**: <2 seconds average (dedicated resources)
+- **Database**: Optimized with Redis caching and connection pooling
+
+### **Scaling Strategies**
+
+**Vertical Scaling** (Simple Mode):
+- Increase server resources (CPU, RAM)
+- Optimize database queries and caching
+- Use CDN for static assets
+
+**Horizontal Scaling** (Platform Mode):
+- Scale individual services based on load
+- Load balance API gateway
+- Database read replicas
+- Redis cluster for session storage
+
+## 🔒 **Security & Privacy**
 
 ### **Data Protection**
-- All data stored in your own PostgreSQL database
+- All data stored in your own database
 - API keys secured in environment variables
 - Session encryption with configurable secrets
 - CSRF protection on all endpoints
 
-### **Authentication**
-- Mock authentication for development
-- Google OAuth for production
-- Session-based authentication
-- Role-based access control ready
+### **Security Features**
+- Input validation and sanitization
+- Rate limiting and DDoS protection
+- Role-based access control (RBAC)
+- Container security with minimal attack surface
 
-### **Best Practices**
-- Regular security updates
-- Input validation on all endpoints
-- SQL injection prevention with parameterized queries
-- XSS protection with React's built-in escaping
+### **Privacy Controls**
+- Self-hosted deployment options
+- No data sent to third parties (except AI APIs)
+- Audit logging and compliance reporting
+- GDPR and data retention controls
 
-## 📈 Performance
+## 📚 **Documentation**
 
-### **Optimization Features**
-- Production build optimization with Vite
-- Lazy loading for React components
-- Database connection pooling
-- Efficient agent health checking
-- Response caching where appropriate
+### **Getting Started Guides**
+- [🚀 Quick Start - Simple Mode](docs/getting-started/simple-deployment.md)
+- [🏢 Platform Mode Deployment](docs/getting-started/platform-deployment.md)
+- [🤔 Choosing Your Deployment](docs/getting-started/choosing-deployment.md)
 
-### **Monitoring**
-- Built-in performance metrics
-- Agent response time tracking
-- Database query performance
-- Memory usage monitoring
-- Request/response logging
+### **Architecture & Development**
+- [🏗️ System Architecture](docs/architecture/overview.md)
+- [🔧 Development Setup](docs/development/local-setup.md)
+- [🤝 Contributing Guide](docs/development/contributing.md)
 
-## 🛠️ Maintenance
+### **Deployment & Operations**
+- [🐳 Docker Deployment](docs/deployment/docker.md)
+- [☸️ Kubernetes Guide](docs/deployment/kubernetes.md)
+- [☁️ Cloud Providers](docs/deployment/cloud-providers.md)
 
-### **Database Migrations**
-```bash
-# Run migrations
-npm run db:migrate
+### **Agent Development**
+- [🤖 Agent Overview](docs/agents/overview.md)
+- [🔌 Custom Agent Development](docs/agents/custom-development.md)
+- [📋 Agent API Reference](docs/agents/api-reference.md)
 
-# Rollback migrations
-npm run db:rollback
+## 🤝 **Contributing**
 
-# Generate new migration
-npm run db:generate
-```
-
-### **Logs and Debugging**
-- Application logs in `logs/` directory
-- Agent communication logs
-- Error tracking and reporting
-- Debug mode with verbose output
-
-### **Backup and Recovery**
-```bash
-# Backup database
-pg_dump -U user -h localhost devteam > backup.sql
-
-# Restore database
-psql -U user -h localhost devteam < backup.sql
-```
-
-## 📚 API Reference
-
-### **Core Endpoints**
-```typescript
-// Agent Management
-GET  /api/ai-agents              // List all agents with status
-GET  /api/ai-agents/:id          // Get specific agent details
-POST /api/ai-agents/:id/tasks    // Assign task to agent
-
-// Project Management
-GET  /api/projects               // List all projects
-POST /api/projects               // Create new project
-PUT  /api/projects/:id           // Update project
-DELETE /api/projects/:id         // Delete project
-
-// Authentication
-POST /api/auth/login            // User login
-POST /api/auth/logout           // User logout
-GET  /api/auth/user             // Current user info
-
-// System
-GET  /api/dashboard/stats       // System statistics
-GET  /api/health                // Health check
-```
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+We welcome contributions! Please see our [Contributing Guide](docs/development/contributing.md) for details.
 
 ### **Development Setup**
 ```bash
-# Fork and clone the repository
-git clone https://github.com/your-username/dev-team-platform.git
-cd dev-team-platform
-
-# Install dependencies
-npm install
-
-# Run tests
-npm test
-
-# Run linting
-npm run lint
+git clone https://github.com/cmndcntrlcyber/dev-team.git
+cd dev-team
+npm run setup
+npm run dev:app  # or npm run dev:platform
 ```
 
-## 📝 Changelog
+### **Testing**
+```bash
+npm run test          # All tests
+npm run test:app      # Simple mode tests
+npm run test:services # Platform mode tests
+npm run lint          # Code quality
+npm run check         # Type checking
+```
 
-### **Version 2.0.0** - Current
-- ✅ Single application architecture
-- ✅ Integrated agent system with mock mode
-- ✅ Platform-agnostic deployment
-- ✅ Real-time health monitoring
-- ✅ Modern React dashboard
-- ✅ PostgreSQL database integration
+## 📝 **Changelog**
 
-### **Version 1.0.0** - Legacy
-- Initial microservices architecture
-- Multiple container deployment
-- Complex service orchestration
+### **Version 2.0.0** - Unified Architecture (Current)
+- ✅ Unified monorepo with dual deployment models
+- ✅ Simple Mode: Integrated single application
+- ✅ Platform Mode: Full microservices architecture  
+- ✅ Comprehensive documentation and migration guides
+- ✅ Optimized Docker deployments for both modes
+- ✅ Enhanced agent capabilities and monitoring
 
-## 📄 License
+### **Version 1.0.0** - Original Implementation
+- ✅ VS Code extension with embedded agents
+- ✅ Single-user local development workflow
+
+See [CHANGELOG.md](CHANGELOG.md) for detailed release notes.
+
+## 📄 **License**
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙋‍♂️ Support
+## 🙋‍♂️ **Support & Community**
 
-### **Documentation**
-- [Installation Guide](docs/INSTALLATION.md)
-- [Configuration Reference](docs/CONFIGURATION.md)
-- [API Documentation](docs/API.md)
-- [Troubleshooting](docs/TROUBLESHOOTING.md)
+### **Getting Help**
+- [📚 Documentation](docs/)
+- [💬 GitHub Discussions](https://github.com/cmndcntrlcyber/dev-team/discussions)
+- [🐛 Issue Tracker](https://github.com/cmndcntrlcyber/dev-team/issues)
+- [📧 Email Support](mailto:support@dev-team-platform.com)
 
 ### **Community**
-- [GitHub Issues](https://github.com/your-username/dev-team-platform/issues)
-- [Discussions](https://github.com/your-username/dev-team-platform/discussions)
+- [Discord Community](https://discord.gg/dev-team-platform)
+- [Twitter Updates](https://twitter.com/devteamplatform)
+- [Development Blog](https://blog.dev-team-platform.com)
+
+## 🌟 **Acknowledgments**
+
+Built with modern technologies:
+- [React](https://reactjs.org) - Frontend framework
+- [Express.js](https://expressjs.com) - Backend framework
+- [TypeScript](https://typescriptlang.org) - Type safety
+- [Docker](https://docker.com) - Containerization
+- [PostgreSQL](https://postgresql.org) - Database
+- [Redis](https://redis.io) - Caching and sessions
+- [NATS](https://nats.io) - Microservices messaging
+- [Anthropic Claude](https://www.anthropic.com) - AI intelligence
+- [Tailwind CSS](https://tailwindcss.com) - Styling
 
 ---
 
-**Built with ❤️ for development teams everywhere**
+**Built with ❤️ by the Dev Team Platform community**
 
-*Empowering developers with intelligent AI collaboration*
+*Choose your deployment model and start building with AI-powered development today!*
