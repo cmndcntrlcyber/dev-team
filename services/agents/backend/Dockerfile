@@ -38,8 +38,6 @@ RUN mkdir -p /app/workspace && chown backagent:nodejs /app/workspace
 COPY --from=builder --chown=backagent:nodejs /app/dist ./dist
 COPY --from=deps --chown=backagent:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=backagent:nodejs /app/package*.json ./
-COPY --from=builder --chown=backagent:nodejs /app/config ./config
-COPY --from=builder --chown=backagent:nodejs /app/prompts ./prompts
 
 USER backagent
 

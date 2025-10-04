@@ -44,10 +44,16 @@ class MCPAgentService {
 
   async initialize(): Promise<void> {
     try {
-      // Initialize Redis connection
-      this.redis = createClient({ url: this.config.redisUrl });
-      this.redis.on('error', (err: Error) => this.logger.error('Redis Client Error', err));
-      await this.redis.connect();
+      // Initialize Redis connection (optional - gracefully handle failures)
+      try {
+        this.redis = createClient({ url: this.config.redisUrl });
+        this.redis.on('error', (err: Error) => this.logger.warn('Redis connection issue (non-critical)', err.message));
+        await this.redis.connect();
+        this.logger.info('Redis connection established');
+      } catch (error) {
+        this.logger.warn('Redis connection failed - continuing without Redis', error);
+        this.redis = null;
+      }
 
       // Initialize NATS connection
       this.nats = await connect({ 

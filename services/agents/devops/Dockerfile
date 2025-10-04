@@ -38,8 +38,6 @@ RUN mkdir -p /app/workspace && chown devopsagent:nodejs /app/workspace
 COPY --from=builder --chown=devopsagent:nodejs /app/dist ./dist
 COPY --from=deps --chown=devopsagent:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=devopsagent:nodejs /app/package*.json ./
-COPY --from=builder --chown=devopsagent:nodejs /app/config ./config
-COPY --from=builder --chown=devopsagent:nodejs /app/prompts ./prompts
 
 USER devopsagent
 

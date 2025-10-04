@@ -38,8 +38,6 @@ RUN mkdir -p /app/workspace && chown archagent:nodejs /app/workspace
 COPY --from=builder --chown=archagent:nodejs /app/dist ./dist
 COPY --from=deps --chown=archagent:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=archagent:nodejs /app/package*.json ./
-COPY --from=builder --chown=archagent:nodejs /app/config ./config
-COPY --from=builder --chown=archagent:nodejs /app/prompts ./prompts
 
 USER archagent
 

@@ -38,8 +38,6 @@ RUN mkdir -p /app/workspace && chown mcpagent:nodejs /app/workspace
 COPY --from=builder --chown=mcpagent:nodejs /app/dist ./dist
 COPY --from=deps --chown=mcpagent:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=mcpagent:nodejs /app/package*.json ./
-COPY --from=builder --chown=mcpagent:nodejs /app/config ./config
-COPY --from=builder --chown=mcpagent:nodejs /app/prompts ./prompts
 
 USER mcpagent
 

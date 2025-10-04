@@ -35,7 +35,6 @@ RUN adduser --system --uid 1001 authsvc
 COPY --from=builder --chown=authsvc:nodejs /app/dist ./dist
 COPY --from=deps --chown=authsvc:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=authsvc:nodejs /app/package*.json ./
-COPY --from=builder --chown=authsvc:nodejs /app/migrations ./migrations
 
 USER authsvc
 

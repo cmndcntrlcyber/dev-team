@@ -38,7 +38,6 @@ RUN mkdir -p /app/data/projects && chown projectsvc:nodejs /app/data/projects
 COPY --from=builder --chown=projectsvc:nodejs /app/dist ./dist
 COPY --from=deps --chown=projectsvc:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=projectsvc:nodejs /app/package*.json ./
-COPY --from=builder --chown=projectsvc:nodejs /app/templates ./templates
 
 USER projectsvc
 

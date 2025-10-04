@@ -38,8 +38,6 @@ RUN mkdir -p /app/workspace && chown qaagent:nodejs /app/workspace
 COPY --from=builder --chown=qaagent:nodejs /app/dist ./dist
 COPY --from=deps --chown=qaagent:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=qaagent:nodejs /app/package*.json ./
-COPY --from=builder --chown=qaagent:nodejs /app/config ./config
-COPY --from=builder --chown=qaagent:nodejs /app/prompts ./prompts
 
 USER qaagent
 

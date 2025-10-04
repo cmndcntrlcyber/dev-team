@@ -38,8 +38,6 @@ RUN mkdir -p /app/workspace && chown frontagent:nodejs /app/workspace
 COPY --from=builder --chown=frontagent:nodejs /app/dist ./dist
 COPY --from=deps --chown=frontagent:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=frontagent:nodejs /app/package*.json ./
-COPY --from=builder --chown=frontagent:nodejs /app/config ./config
-COPY --from=builder --chown=frontagent:nodejs /app/prompts ./prompts
 
 USER frontagent
 
