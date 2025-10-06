@@ -13,13 +13,19 @@ import {
   Grid3X3,
   FolderOpen,
   LogOut,
-  FileKey
+  FileKey,
+  GitBranch,
+  Rocket,
+  Package
 } from "lucide-react";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: Gauge },
   { name: "Projects", href: "/projects", icon: Briefcase },
   { name: "Tasks", href: "/tasks", icon: CheckSquare },
+  { name: "Repositories", href: "/repositories", icon: GitBranch },
+  { name: "Deployments", href: "/deployments", icon: Rocket },
+  { name: "Releases", href: "/releases", icon: Package },
   { name: "Analytics", href: "/analytics", icon: BarChart3 },
 ];
 

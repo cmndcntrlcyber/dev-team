@@ -14,8 +14,12 @@ import Integrations from "@/pages/integrations";
 import FileManager from "@/pages/file-manager";
 import Certificates from "@/pages/certificates";
 import Settings from "@/pages/settings";
+import Repositories from "@/pages/repositories";
+import Deployments from "@/pages/deployments";
+import Releases from "@/pages/releases";
 import Login from "@/pages/login";
 import Sidebar from "@/components/sidebar";
+import { ErrorBoundary } from "@/components/error-boundary";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -40,6 +44,9 @@ function Router() {
           <Route path="/" component={Dashboard} />
           <Route path="/projects" component={Projects} />
           <Route path="/tasks" component={Tasks} />
+          <Route path="/repositories" component={Repositories} />
+          <Route path="/deployments" component={Deployments} />
+          <Route path="/releases" component={Releases} />
           <Route path="/analytics" component={Analytics} />
           <Route path="/agents" component={DevAgents} />
           <Route path="/integrations" component={Integrations} />
@@ -55,12 +62,14 @@ function Router() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

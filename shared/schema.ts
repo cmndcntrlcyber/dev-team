@@ -26,100 +26,120 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-// Red Team Operations
-export const operations = pgTable("operations", {
+// Software Development Projects
+export const projects = pgTable("projects", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  codename: text("codename"),
-  status: text("status").notNull().default("planning"), // planning, active, paused, completed
-  type: text("type").notNull(), // penetration-test, red-team, purple-team, assumed-breach
   description: text("description"),
+  repositoryUrl: text("repository_url"),
+  status: text("status").notNull().default("planning"), // planning, active, maintenance, archived, on-hold
+  methodology: text("methodology").default("agile"), // kanban, agile, lean, six-sigma, waterfall
   priority: text("priority").default("medium"), // low, medium, high, critical
+  teamSize: text("team_size").default("small"), // small (1-5), medium (6-15), large (16+)
+  techStack: json("tech_stack").$type<string[]>().default([]), // Technologies used
   tags: json("tags").$type<string[]>().default([]),
-  objectives: json("objectives").$type<string[]>().default([]), // Operation objectives
-  scope: json("scope").$type<string[]>().default([]), // IP ranges, domains, etc.
-  rulesOfEngagement: text("rules_of_engagement"), // ROE documentation
-  clientContact: text("client_contact"),
+  objectives: json("objectives").$type<string[]>().default([]),
   teamLead: text("team_lead"),
+  teamMembers: json("team_members").$type<string[]>().default([]),
+  startDate: timestamp("start_date"),
+  targetReleaseDate: timestamp("target_release_date"),
+  actualReleaseDate: timestamp("actual_release_date"),
+  githubRepo: text("github_repo"),
+  jenkinsPipeline: text("jenkins_pipeline"),
+  cloudflareZone: text("cloudflare_zone"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Development Environments (Dev, Staging, Production)
+export const environments = pgTable("environments", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => projects.id).notNull(),
+  name: text("name").notNull(), // e.g., "Development", "Staging", "Production"
+  type: text("type").notNull(), // development, staging, production, testing
+  url: text("url"), // Deployment URL
+  status: text("status").notNull().default("inactive"), // active, inactive, deploying, error
+  healthStatus: text("health_status").default("unknown"), // healthy, degraded, down, unknown
+  version: text("version"), // Current deployed version
+  lastDeployment: timestamp("last_deployment"),
+  lastHealthCheck: timestamp("last_health_check"),
+  tags: json("tags").$type<string[]>().default([]),
+  configuration: json("configuration").$type<Record<string, any>>().default({}),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Sprints for Agile project management
+export const sprints = pgTable("sprints", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => projects.id).notNull(),
+  name: text("name").notNull(),
+  goal: text("goal"),
+  sprintNumber: integer("sprint_number"),
+  status: text("status").notNull().default("planned"), // planned, active, completed, cancelled
   startDate: timestamp("start_date"),
   endDate: timestamp("end_date"),
-  notes: text("notes"), // Internal notes
+  velocity: integer("velocity"), // Story points completed
+  plannedPoints: integer("planned_points"),
+  completedPoints: integer("completed_points"),
+  burndownData: json("burndown_data").$type<any[]>().default([]),
+  retrospectiveNotes: text("retrospective_notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-// Compromised Systems/Hosts
-export const systems = pgTable("systems", {
+// Development Tasks/User Stories
+export const tasks = pgTable("tasks", {
   id: serial("id").primaryKey(),
-  operationId: integer("operation_id").references(() => operations.id).notNull(),
-  hostname: text("hostname"),
-  ipAddress: text("ip_address").notNull(),
-  operatingSystem: text("operating_system"),
-  status: text("status").notNull().default("discovered"), // discovered, scanned, compromised, pivoted
-  accessLevel: text("access_level"), // none, user, admin, system, domain-admin
-  tags: json("tags").$type<string[]>().default([]),
-  services: json("services").$type<any[]>().default([]), // Running services
-  notes: text("notes"),
-  lastSeen: timestamp("last_seen").defaultNow(),
-  compromisedAt: timestamp("compromised_at"),
+  projectId: integer("project_id").references(() => projects.id).notNull(),
+  sprintId: integer("sprint_id").references(() => sprints.id),
+  title: text("title").notNull(),
+  description: text("description"),
+  type: text("type").notNull().default("feature"), // feature, bug, refactor, documentation, test, chore
+  status: text("status").notNull().default("backlog"), // backlog, todo, in-progress, review, done, blocked
+  priority: text("priority").default("medium"), // low, medium, high, critical
+  assigneeId: text("assignee_id").references(() => users.id),
+  reporterId: text("reporter_id").references(() => users.id),
+  storyPoints: integer("story_points"),
+  estimatedHours: decimal("estimated_hours"),
+  actualHours: decimal("actual_hours"),
+  labels: json("labels").$type<string[]>().default([]),
+  dependencies: json("dependencies").$type<number[]>().default([]), // Task IDs this depends on
+  blockedBy: json("blocked_by").$type<number[]>().default([]), // Task IDs blocking this
+  dueDate: timestamp("due_date"),
+  completedAt: timestamp("completed_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-// C2 Beacons
-export const beacons = pgTable("beacons", {
+// Issues/Bugs (transformed from vulnerabilities)
+export const issues = pgTable("issues", {
   id: serial("id").primaryKey(),
-  operationId: integer("operation_id").references(() => operations.id).notNull(),
-  systemId: integer("system_id").references(() => systems.id),
-  beaconId: text("beacon_id").notNull().unique(), // Unique beacon identifier
-  type: text("type").notNull(), // cobalt-strike, metasploit, empire, custom
-  status: text("status").notNull().default("active"), // active, sleeping, dead, lost
-  hostname: text("hostname"),
-  username: text("username"),
-  pid: integer("pid"),
-  architecture: text("architecture"), // x86, x64
-  integrity: text("integrity"), // low, medium, high, system
-  lastCheckin: timestamp("last_checkin").defaultNow(),
-  sleepTime: integer("sleep_time"), // in seconds
-  jitter: integer("jitter"), // percentage
-  externalIp: text("external_ip"),
-  internalIp: text("internal_ip"),
+  projectId: integer("project_id").references(() => projects.id).notNull(),
+  sprintId: integer("sprint_id").references(() => sprints.id),
+  title: text("title").notNull(),
+  description: text("description"),
+  type: text("type").notNull().default("bug"), // bug, enhancement, task, question
+  severity: text("severity").notNull().default("medium"), // critical, high, medium, low
+  status: text("status").notNull().default("new"), // new, assigned, in-progress, resolved, closed, reopened
+  assigneeId: text("assignee_id").references(() => users.id),
+  reporterId: text("reporter_id").references(() => users.id),
+  storyPoints: integer("story_points"),
+  estimatedHours: decimal("estimated_hours"),
+  labels: json("labels").$type<string[]>().default([]),
+  relatedTaskId: integer("related_task_id").references(() => tasks.id),
+  environmentId: integer("environment_id").references(() => environments.id),
+  reproductionSteps: text("reproduction_steps"),
+  expectedBehavior: text("expected_behavior"),
+  actualBehavior: text("actual_behavior"),
   metadata: json("metadata").$type<Record<string, any>>().default({}),
+  attachments: json("attachments").$type<string[]>().default([]),
+  resolvedAt: timestamp("resolved_at"),
+  closedAt: timestamp("closed_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
-
-// Network Discovery Results
-export const networkDiscoveries = pgTable("network_discoveries", {
-  id: serial("id").primaryKey(),
-  operationId: integer("operation_id").references(() => operations.id).notNull(),
-  systemId: integer("system_id").references(() => systems.id),
-  type: text("type").notNull(), // arp-scan, port-scan, service-scan, vulnerability-scan
-  target: text("target").notNull(), // IP, range, or hostname
-  results: json("results").$type<any>().notNull(),
-  toolUsed: text("tool_used"), // nmap, masscan, arp-scan, etc.
-  commandLine: text("command_line"),
-  scanDuration: integer("scan_duration"), // in seconds
-  discoveredHosts: integer("discovered_hosts").default(0),
-  discoveredServices: integer("discovered_services").default(0),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
-// Remote Desktop Sessions (RustDesk)
-export const remoteSessions = pgTable("remote_sessions", {
-  id: serial("id").primaryKey(),
-  operationId: integer("operation_id").references(() => operations.id).notNull(),
-  systemId: integer("system_id").references(() => systems.id).notNull(),
-  sessionType: text("session_type").notNull(), // rustdesk, rdp, vnc, ssh
-  connectionId: text("connection_id").notNull(),
-  status: text("status").notNull().default("inactive"), // active, inactive, connecting
-  remoteAddress: text("remote_address"),
-  remotePort: integer("remote_port"),
-  rustdeskId: text("rustdesk_id"), // RustDesk ID
-  rustdeskPassword: text("rustdesk_password"), // Encrypted
-  notes: text("notes"),
-  startedAt: timestamp("started_at"),
-  endedAt: timestamp("ended_at"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const aiAgents = pgTable("ai_agents", {
@@ -154,29 +174,73 @@ export const aiAgents = pgTable("ai_agents", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-// Operation Reports
-export const reports = pgTable("reports", {
+// Git Repositories
+export const repositories = pgTable("repositories", {
   id: serial("id").primaryKey(),
-  operationId: integer("operation_id").references(() => operations.id).notNull(),
-  type: text("type").notNull(), // initial-access, lateral-movement, persistence, exfiltration, post-exploitation
-  title: text("title").notNull(),
-  content: text("content").notNull(),
-  format: text("format").notNull().default("markdown"), // markdown, html, json
-  aiGenerated: boolean("ai_generated").default(false),
+  projectId: integer("project_id").references(() => projects.id).notNull(),
+  name: text("name").notNull(),
+  url: text("url").notNull(),
+  provider: text("provider").notNull(), // github, gitlab, bitbucket
+  defaultBranch: text("default_branch").default("main"),
+  lastCommitSha: text("last_commit_sha"),
+  lastCommitMessage: text("last_commit_message"),
+  lastCommitAuthor: text("last_commit_author"),
+  lastSync: timestamp("last_sync"),
+  webhooksConfigured: boolean("webhooks_configured").default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Deployments
+export const deployments = pgTable("deployments", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => projects.id).notNull(),
+  environmentId: integer("environment_id").references(() => environments.id).notNull(),
+  version: text("version").notNull(),
+  status: text("status").notNull().default("pending"), // pending, deploying, success, failed, rolled-back
+  deployedById: text("deployed_by_id").references(() => users.id),
+  gitCommitSha: text("git_commit_sha"),
+  deploymentLog: text("deployment_log"),
+  rollbackAvailable: boolean("rollback_available").default(true),
+  startedAt: timestamp("started_at"),
+  completedAt: timestamp("completed_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const clientCertificates = pgTable("client_certificates", {
+// Pull Requests
+export const pullRequests = pgTable("pull_requests", {
   id: serial("id").primaryKey(),
-  name: text("name").notNull(),
+  repositoryId: integer("repository_id").references(() => repositories.id).notNull(),
+  number: integer("number").notNull(),
+  title: text("title").notNull(),
   description: text("description"),
-  certificateFile: text("certificate_file").notNull(), // path to .crt/.pem file
-  privateKeyFile: text("private_key_file").notNull(), // path to .key file
-  caFile: text("ca_file"), // optional CA certificate file
-  passphrase: text("passphrase"), // encrypted passphrase for private key
-  domain: text("domain"), // target domain/scope
-  expiresAt: timestamp("expires_at"),
-  isActive: boolean("is_active").default(true),
+  authorId: text("author_id").references(() => users.id),
+  status: text("status").notNull().default("open"), // open, merged, closed
+  sourceBranch: text("source_branch").notNull(),
+  targetBranch: text("target_branch").notNull(),
+  reviewers: json("reviewers").$type<string[]>().default([]),
+  approvedBy: json("approved_by").$type<string[]>().default([]),
+  commentsCount: integer("comments_count").default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  mergedAt: timestamp("merged_at"),
+  closedAt: timestamp("closed_at"),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Software Releases
+export const releases = pgTable("releases", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => projects.id).notNull(),
+  version: text("version").notNull(),
+  title: text("title").notNull(),
+  releaseNotes: text("release_notes"),
+  changelog: text("changelog"),
+  gitTag: text("git_tag"),
+  deploymentStatus: text("deployment_status").default("pending"), // pending, deploying, deployed, failed
+  breakingChanges: json("breaking_changes").$type<string[]>().default([]),
+  migrationGuide: text("migration_guide"),
+  aiGenerated: boolean("ai_generated").default(false),
+  releaseDate: timestamp("release_date"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -191,122 +255,120 @@ export const globalConfig = pgTable("global_config", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-// Programs table (for Bug Bounty programs)
-export const programs = pgTable("programs", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  type: text("type").notNull(), // bug-bounty, private, internal
-  platform: text("platform"), // hackerone, bugcrowd, synack, etc.
-  url: text("url"),
-  description: text("description"),
-  status: text("status").notNull().default("active"), // active, inactive, paused
-  codename: text("codename"),
-  priority: text("priority").default("medium"), // low, medium, high, critical
-  tags: json("tags").$type<string[]>().default([]),
-  scope: json("scope").$type<string[]>().default([]),
-  objectives: json("objectives").$type<string[]>().default([]),
-  rulesOfEngagement: text("rules_of_engagement"),
-  clientContact: text("client_contact"),
-  teamLead: text("team_lead"),
-  startDate: timestamp("start_date"),
-  endDate: timestamp("end_date"),
-  minReward: integer("min_reward"),
-  maxReward: integer("max_reward"),
-  vulnerabilityTypes: json("vulnerability_types").$type<string[]>().default([]),
-  notes: text("notes"),
-  contactEmail: text("contact_email"),
-  contactName: text("contact_name"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
-
-// Vulnerabilities table
-export const vulnerabilities = pgTable("vulnerabilities", {
-  id: serial("id").primaryKey(),
-  programId: integer("program_id").references(() => programs.id),
-  operationId: integer("operation_id").references(() => operations.id).notNull(),
-  beaconId: text("beacon_id").notNull(),
-  type: text("type").notNull(), // xss, sqli, rce, etc.
-  title: text("title").notNull(),
-  description: text("description"),
-  severity: text("severity").notNull(), // P1, P2, P3, P4
-  status: text("status").notNull().default("new"), // new, triaged, resolved
-  proofOfConcept: text("proof_of_concept"),
-  recommendations: text("recommendations"),
-  cvssScore: decimal("cvss_score"),
-  reward: integer("reward"),
-  metadata: json("metadata").$type<Record<string, any>>().default({}),
-  integrity: text("integrity"),
-  username: text("username"),
-  hostname: text("hostname"),
-  systemId: integer("system_id").references(() => systems.id),
-  pid: integer("pid"),
-  architecture: text("architecture"),
-  lastCheckin: timestamp("last_checkin"),
-  sleepTime: integer("sleep_time"),
-  jitter: integer("jitter"),
-  attachments: json("attachments").$type<File[]>().default([]),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
-
-// Relations
-// Relations for Red Team entities
-export const operationsRelations = relations(operations, ({ many }) => ({
-  systems: many(systems),
-  beacons: many(beacons),
-  networkDiscoveries: many(networkDiscoveries),
-  remoteSessions: many(remoteSessions),
-  reports: many(reports),
+// Relations for SDLC entities
+export const projectsRelations = relations(projects, ({ many }) => ({
+  environments: many(environments),
+  sprints: many(sprints),
+  tasks: many(tasks),
+  issues: many(issues),
+  repositories: many(repositories),
+  deployments: many(deployments),
+  releases: many(releases),
 }));
 
-export const systemsRelations = relations(systems, ({ one, many }) => ({
-  operation: one(operations, {
-    fields: [systems.operationId],
-    references: [operations.id],
+export const environmentsRelations = relations(environments, ({ one, many }) => ({
+  project: one(projects, {
+    fields: [environments.projectId],
+    references: [projects.id],
   }),
-  beacons: many(beacons),
-  networkDiscoveries: many(networkDiscoveries),
-  remoteSessions: many(remoteSessions),
+  deployments: many(deployments),
+  issues: many(issues),
 }));
 
-export const beaconsRelations = relations(beacons, ({ one }) => ({
-  operation: one(operations, {
-    fields: [beacons.operationId],
-    references: [operations.id],
+export const sprintsRelations = relations(sprints, ({ one, many }) => ({
+  project: one(projects, {
+    fields: [sprints.projectId],
+    references: [projects.id],
   }),
-  system: one(systems, {
-    fields: [beacons.systemId],
-    references: [systems.id],
+  tasks: many(tasks),
+  issues: many(issues),
+}));
+
+export const tasksRelations = relations(tasks, ({ one, many }) => ({
+  project: one(projects, {
+    fields: [tasks.projectId],
+    references: [projects.id],
+  }),
+  sprint: one(sprints, {
+    fields: [tasks.sprintId],
+    references: [sprints.id],
+  }),
+  assignee: one(users, {
+    fields: [tasks.assigneeId],
+    references: [users.id],
+  }),
+  reporter: one(users, {
+    fields: [tasks.reporterId],
+    references: [users.id],
+  }),
+  relatedIssues: many(issues),
+}));
+
+export const issuesRelations = relations(issues, ({ one }) => ({
+  project: one(projects, {
+    fields: [issues.projectId],
+    references: [projects.id],
+  }),
+  sprint: one(sprints, {
+    fields: [issues.sprintId],
+    references: [sprints.id],
+  }),
+  assignee: one(users, {
+    fields: [issues.assigneeId],
+    references: [users.id],
+  }),
+  reporter: one(users, {
+    fields: [issues.reporterId],
+    references: [users.id],
+  }),
+  relatedTask: one(tasks, {
+    fields: [issues.relatedTaskId],
+    references: [tasks.id],
+  }),
+  environment: one(environments, {
+    fields: [issues.environmentId],
+    references: [environments.id],
   }),
 }));
 
-export const networkDiscoveriesRelations = relations(networkDiscoveries, ({ one }) => ({
-  operation: one(operations, {
-    fields: [networkDiscoveries.operationId],
-    references: [operations.id],
+export const repositoriesRelations = relations(repositories, ({ one, many }) => ({
+  project: one(projects, {
+    fields: [repositories.projectId],
+    references: [projects.id],
   }),
-  system: one(systems, {
-    fields: [networkDiscoveries.systemId],
-    references: [systems.id],
+  pullRequests: many(pullRequests),
+}));
+
+export const deploymentsRelations = relations(deployments, ({ one }) => ({
+  project: one(projects, {
+    fields: [deployments.projectId],
+    references: [projects.id],
+  }),
+  environment: one(environments, {
+    fields: [deployments.environmentId],
+    references: [environments.id],
+  }),
+  deployedBy: one(users, {
+    fields: [deployments.deployedById],
+    references: [users.id],
   }),
 }));
 
-export const remoteSessionsRelations = relations(remoteSessions, ({ one }) => ({
-  operation: one(operations, {
-    fields: [remoteSessions.operationId],
-    references: [operations.id],
+export const pullRequestsRelations = relations(pullRequests, ({ one }) => ({
+  repository: one(repositories, {
+    fields: [pullRequests.repositoryId],
+    references: [repositories.id],
   }),
-  system: one(systems, {
-    fields: [remoteSessions.systemId],
-    references: [systems.id],
+  author: one(users, {
+    fields: [pullRequests.authorId],
+    references: [users.id],
   }),
 }));
 
-export const reportsRelations = relations(reports, ({ one }) => ({
-  operation: one(operations, {
-    fields: [reports.operationId],
-    references: [operations.id],
+export const releasesRelations = relations(releases, ({ one }) => ({
+  project: one(projects, {
+    fields: [releases.projectId],
+    references: [projects.id],
   }),
 }));
 
@@ -317,64 +379,89 @@ export const aiAgentsRelations = relations(aiAgents, ({ one }) => ({
   }),
 }));
 
-export const programsRelations = relations(programs, ({ many }) => ({
-  vulnerabilities: many(vulnerabilities),
-}));
-
-export const vulnerabilitiesRelations = relations(vulnerabilities, ({ one }) => ({
-  program: one(programs, {
-    fields: [vulnerabilities.programId],
-    references: [programs.id],
-  }),
-  operation: one(operations, {
-    fields: [vulnerabilities.operationId],
-    references: [operations.id],
-  }),
-  system: one(systems, {
-    fields: [vulnerabilities.systemId],
-    references: [systems.id],
-  }),
-}));
-
-// Insert schemas
-// Insert schemas
+// Insert schemas for SDLC tables with date coercion
 export const insertUserSchema = createInsertSchema(users).omit({ createdAt: true, updatedAt: true });
 export const upsertUserSchema = createInsertSchema(users).omit({ createdAt: true, updatedAt: true });
-export const insertOperationSchema = createInsertSchema(operations).omit({ id: true, createdAt: true, updatedAt: true });
-export const insertSystemSchema = createInsertSchema(systems).omit({ id: true, createdAt: true });
-export const insertBeaconSchema = createInsertSchema(beacons).omit({ id: true, createdAt: true, updatedAt: true });
-export const insertNetworkDiscoverySchema = createInsertSchema(networkDiscoveries).omit({ id: true, createdAt: true });
-export const insertRemoteSessionSchema = createInsertSchema(remoteSessions).omit({ id: true, createdAt: true });
-export const insertAiAgentSchema = createInsertSchema(aiAgents).omit({ id: true, createdAt: true });
-export const insertReportSchema = createInsertSchema(reports).omit({ id: true, createdAt: true });
-export const insertClientCertificateSchema = createInsertSchema(clientCertificates).omit({ id: true, createdAt: true, updatedAt: true });
-export const insertGlobalConfigSchema = createInsertSchema(globalConfig).omit({ id: true, createdAt: true, updatedAt: true });
-export const insertProgramSchema = createInsertSchema(programs).omit({ id: true, createdAt: true, updatedAt: true });
-export const insertVulnerabilitySchema = createInsertSchema(vulnerabilities).omit({ id: true, createdAt: true, updatedAt: true });
 
-// Types
+export const insertProjectSchema = createInsertSchema(projects).omit({ id: true, createdAt: true, updatedAt: true }).extend({
+  targetReleaseDate: z.coerce.date().optional().nullable(),
+  startDate: z.coerce.date().optional().nullable(),
+  actualReleaseDate: z.coerce.date().optional().nullable(),
+});
+
+export const insertEnvironmentSchema = createInsertSchema(environments).omit({ id: true, createdAt: true, updatedAt: true }).extend({
+  lastDeployment: z.coerce.date().optional().nullable(),
+  lastHealthCheck: z.coerce.date().optional().nullable(),
+});
+
+export const insertSprintSchema = createInsertSchema(sprints).omit({ id: true, createdAt: true, updatedAt: true }).extend({
+  startDate: z.coerce.date().optional().nullable(),
+  endDate: z.coerce.date().optional().nullable(),
+});
+
+export const insertTaskSchema = createInsertSchema(tasks).omit({ id: true, createdAt: true, updatedAt: true }).extend({
+  dueDate: z.coerce.date().optional().nullable(),
+  completedAt: z.coerce.date().optional().nullable(),
+});
+
+export const insertIssueSchema = createInsertSchema(issues).omit({ id: true, createdAt: true, updatedAt: true }).extend({
+  resolvedAt: z.coerce.date().optional().nullable(),
+  closedAt: z.coerce.date().optional().nullable(),
+});
+
+export const insertRepositorySchema = createInsertSchema(repositories).omit({ id: true, createdAt: true, updatedAt: true }).extend({
+  lastSync: z.coerce.date().optional().nullable(),
+});
+
+export const insertDeploymentSchema = createInsertSchema(deployments).omit({ id: true, createdAt: true }).extend({
+  startedAt: z.coerce.date().optional().nullable(),
+  completedAt: z.coerce.date().optional().nullable(),
+});
+
+export const insertPullRequestSchema = createInsertSchema(pullRequests).omit({ id: true, createdAt: true, updatedAt: true }).extend({
+  mergedAt: z.coerce.date().optional().nullable(),
+  closedAt: z.coerce.date().optional().nullable(),
+});
+
+export const insertReleaseSchema = createInsertSchema(releases).omit({ id: true, createdAt: true, updatedAt: true }).extend({
+  releaseDate: z.coerce.date().optional().nullable(),
+});
+
+export const insertAiAgentSchema = createInsertSchema(aiAgents).omit({ id: true, createdAt: true, updatedAt: true }).extend({
+  lastPing: z.coerce.date().optional().nullable(),
+});
+
+export const insertGlobalConfigSchema = createInsertSchema(globalConfig).omit({ id: true, createdAt: true, updatedAt: true });
+
+// Types for SDLC tables
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
 export type User = typeof users.$inferSelect;
-export type InsertOperation = z.infer<typeof insertOperationSchema>;
-export type Operation = typeof operations.$inferSelect;
-export type InsertSystem = z.infer<typeof insertSystemSchema>;
-export type System = typeof systems.$inferSelect;
-export type InsertBeacon = z.infer<typeof insertBeaconSchema>;
-export type Beacon = typeof beacons.$inferSelect;
-export type InsertNetworkDiscovery = z.infer<typeof insertNetworkDiscoverySchema>;
-export type NetworkDiscovery = typeof networkDiscoveries.$inferSelect;
-export type InsertRemoteSession = z.infer<typeof insertRemoteSessionSchema>;
-export type RemoteSession = typeof remoteSessions.$inferSelect;
+export type InsertProject = z.infer<typeof insertProjectSchema>;
+export type Project = typeof projects.$inferSelect;
+export type InsertEnvironment = z.infer<typeof insertEnvironmentSchema>;
+export type Environment = typeof environments.$inferSelect;
+export type InsertSprint = z.infer<typeof insertSprintSchema>;
+export type Sprint = typeof sprints.$inferSelect;
+export type InsertTask = z.infer<typeof insertTaskSchema>;
+export type Task = typeof tasks.$inferSelect;
+export type InsertIssue = z.infer<typeof insertIssueSchema>;
+export type Issue = typeof issues.$inferSelect;
+export type InsertRepository = z.infer<typeof insertRepositorySchema>;
+export type Repository = typeof repositories.$inferSelect;
+export type InsertDeployment = z.infer<typeof insertDeploymentSchema>;
+export type Deployment = typeof deployments.$inferSelect;
+export type InsertPullRequest = z.infer<typeof insertPullRequestSchema>;
+export type PullRequest = typeof pullRequests.$inferSelect;
+export type InsertRelease = z.infer<typeof insertReleaseSchema>;
+export type Release = typeof releases.$inferSelect;
 export type InsertAiAgent = z.infer<typeof insertAiAgentSchema>;
 export type AiAgent = typeof aiAgents.$inferSelect;
-export type InsertReport = z.infer<typeof insertReportSchema>;
-export type Report = typeof reports.$inferSelect;
-export type InsertClientCertificate = z.infer<typeof insertClientCertificateSchema>;
-export type ClientCertificate = typeof clientCertificates.$inferSelect;
 export type InsertGlobalConfig = z.infer<typeof insertGlobalConfigSchema>;
 export type GlobalConfig = typeof globalConfig.$inferSelect;
-export type InsertProgram = z.infer<typeof insertProgramSchema>;
-export type Program = typeof programs.$inferSelect;
-export type InsertVulnerability = z.infer<typeof insertVulnerabilitySchema>;
-export type Vulnerability = typeof vulnerabilities.$inferSelect;
+
+// Legacy type aliases for backward compatibility during migration
+export type Program = Project;
+export type InsertProgram = InsertProject;
+export type Vulnerability = Issue;
+export type InsertVulnerability = InsertIssue;

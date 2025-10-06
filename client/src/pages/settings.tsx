@@ -144,8 +144,9 @@ export default function Settings() {
   const [apiSettings, setApiSettings] = useState({
     openaiApiKey: "",
     anthropicApiKey: "",
-    burpEndpoint: "http://localhost:1337",
-    localAiEndpoint: "http://localhost:11434"
+    githubToken: "",
+    jenkinsEndpoint: "http://localhost:8080",
+    cloudflareToken: ""
   });
 
   const [userProfile, setUserProfile] = useState({
@@ -278,14 +279,71 @@ export default function Settings() {
     saveApiSettings.mutate();
   };
 
-  const handleExportData = () => {
-    // Export all user data
-    console.log("Exporting data...");
+  const handleExportData = async () => {
+    try {
+      const response = await fetch('/api/export-data');
+      const data = await response.json();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `dev-team-export-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Export Successful",
+        description: "Your data has been exported successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Export Failed",
+        description: "Failed to export data. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleImportData = () => {
-    // Import user data
-    console.log("Importing data...");
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/json';
+    input.onchange = async (e: any) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      
+      try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        
+        const response = await fetch('/api/import-data', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          toast({
+            title: "Import Successful",
+            description: `Imported ${result.itemsImported} items successfully.`,
+          });
+          // Refresh data
+          window.location.reload();
+        } else {
+          throw new Error('Import failed');
+        }
+      } catch (error) {
+        toast({
+          title: "Import Failed",
+          description: "Failed to import data. Please check the file format.",
+          variant: "destructive",
+        });
+      }
+    };
+    input.click();
   };
 
   return (
@@ -435,26 +493,41 @@ export default function Settings() {
 
                 <Separator className="bg-gray-700" />
 
+                <Separator className="bg-gray-700" />
+
                 <div>
-                  <label className="text-sm text-gray-300 mb-2 block">Burp Suite Endpoint</label>
+                  <label className="text-sm text-gray-300 mb-2 block">GitHub Token</label>
                   <Input
-                    value={apiSettings.burpEndpoint}
-                    onChange={(e) => setApiSettings(prev => ({ ...prev, burpEndpoint: e.target.value }))}
-                    placeholder="http://localhost:1337"
+                    type="password"
+                    value={apiSettings.githubToken || ""}
+                    onChange={(e) => setApiSettings(prev => ({ ...prev, githubToken: e.target.value }))}
+                    placeholder="ghp_..."
                     className="bg-card border-gray-600 text-gray-100"
                   />
-                  <p className="text-xs text-gray-400 mt-1">REST API endpoint for Burp Suite Professional</p>
+                  <p className="text-xs text-gray-400 mt-1">Personal access token for GitHub integration (repo access)</p>
                 </div>
 
                 <div>
-                  <label className="text-sm text-gray-300 mb-2 block">Local AI Endpoint</label>
+                  <label className="text-sm text-gray-300 mb-2 block">Jenkins Endpoint</label>
                   <Input
-                    value={apiSettings.localAiEndpoint}
-                    onChange={(e) => setApiSettings(prev => ({ ...prev, localAiEndpoint: e.target.value }))}
-                    placeholder="http://localhost:11434"
+                    value={apiSettings.jenkinsEndpoint || "http://localhost:8080"}
+                    onChange={(e) => setApiSettings(prev => ({ ...prev, jenkinsEndpoint: e.target.value }))}
+                    placeholder="http://localhost:8080"
                     className="bg-card border-gray-600 text-gray-100"
                   />
-                  <p className="text-xs text-gray-400 mt-1">Ollama or other local AI service endpoint</p>
+                  <p className="text-xs text-gray-400 mt-1">Jenkins CI/CD server endpoint</p>
+                </div>
+
+                <div>
+                  <label className="text-sm text-gray-300 mb-2 block">Cloudflare API Token</label>
+                  <Input
+                    type="password"
+                    value={apiSettings.cloudflareToken || ""}
+                    onChange={(e) => setApiSettings(prev => ({ ...prev, cloudflareToken: e.target.value }))}
+                    placeholder="..."
+                    className="bg-card border-gray-600 text-gray-100"
+                  />
+                  <p className="text-xs text-gray-400 mt-1">API token for Cloudflare CDN and DNS management</p>
                 </div>
 
                 <Button onClick={handleSaveApiSettings} className="bg-primary hover:bg-primary/90">

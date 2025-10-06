@@ -439,14 +439,7 @@ export default function Integrations() {
   };
 
   const openApp = (app: IntegrationApp) => {
-    // In Replit environment, use the proxy URL
-    const isReplit = window.location.hostname.includes('.replit.dev') || window.location.hostname.includes('.repl.co');
-    if (isReplit) {
-      const baseUrl = window.location.origin;
-      window.open(`${baseUrl}/proxy/${app.port}/`, '_blank');
-    } else {
-      window.open(`http://localhost:${app.port}`, '_blank');
-    }
+    window.open(`http://localhost:${app.port}`, '_blank');
   };
 
   const filteredApps = (category: string) => 
@@ -648,12 +641,7 @@ export default function Integrations() {
                             size="sm" 
                             className="bg-primary hover:bg-primary/90 text-white"
                             onClick={() => {
-                              const isReplit = window.location.hostname.includes('.replit.dev') || window.location.hostname.includes('.repl.co');
-                              if (isReplit) {
-                                window.open(`${window.location.origin}/proxy/${container.port}/`, '_blank');
-                              } else {
-                                window.open(`http://localhost:${container.port}`, '_blank');
-                              }
+                              window.open(`http://localhost:${container.port}`, '_blank');
                             }}
                           >
                             <ExternalLink className="h-3 w-3 mr-1" />
