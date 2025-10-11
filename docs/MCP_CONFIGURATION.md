@@ -1,127 +1,175 @@
-# Cloudflare MCP Configuration Guide
+# MCP Configuration Guide
 
 ## 📋 Overview
 
-This document describes the Cloudflare Model Context Protocol (MCP) integration for the dev-team platform. MCP enables AI agents to interact with Cloudflare's suite of services through standardized tools and resources.
+This document describes the Model Context Protocol (MCP) integration for the dev-team platform and clarifies the role of MCP-Nexus in the architecture.
 
-## 🔗 Direct MCP Server Connections
+## 🏗️ Architecture Clarification
 
-This configuration uses **direct connections** to Cloudflare's hosted MCP servers. Each server is accessed individually through its own endpoint, without requiring an MCP portal.
+### What MCP-Nexus Actually Is
 
-**Configured Servers:**
-- **Workers Bindings:** `https://bindings.mcp.cloudflare.com/sse`
-- **Browser Rendering:** `https://browser.mcp.cloudflare.com/sse`
-- **Documentation:** `https://docs.mcp.cloudflare.com/sse`
-- **Observability:** `https://observability.mcp.cloudflare.com/sse`
-- **Workers Builds:** `https://builds.mcp.cloudflare.com/sse`
+**MCP-Nexus** (`/home/cmndcntrl/code/MCP-Nexus`) is an **MCP Server Manager** - a web-based control panel for managing MCP server processes, edge devices, and monitoring. It is **NOT** an MCP protocol gateway or portal.
 
-Each server handles its own authentication via OAuth and Cloudflare API tokens.
+**MCP-Nexus Capabilities:**
+- ✅ Server lifecycle management (start/stop/restart)
+- ✅ Edge device registration and monitoring
+- ✅ Certificate deployment
+- ✅ Real-time monitoring and logs
+- ✅ WebSocket-based UI updates
 
-## 🎯 Available MCP Servers
+**MCP-Nexus Does NOT:**
+- ❌ Implement MCP protocol SSE endpoints
+- ❌ Act as authentication proxy for Cloudflare MCP
+- ❌ Route MCP tool requests
+- ❌ Provide MCP resources or tools
 
-### Critical Priority Servers
+### Currently Configured MCP Servers
 
-#### 1. Workers Bindings Server
-- **URL:** `https://bindings.mcp.cloudflare.com/sse`
-- **Purpose:** Manage Workers AI, KV namespaces, R2 buckets, D1 databases, and Durable Objects
-- **Authentication:** Required (OAuth + API Token)
-- **Used By:** Architecture Lead, Backend Integration, MCP Integration agents
+**Active MCP Servers:**
+1. **Tavily Search** - Web search capabilities via Tavily AI API
+2. **ProxmoxMCP** - Proxmox VE cluster management and VM operations
+3. **Cloudflare MCP** - Official Cloudflare infrastructure management (Workers, KV, R2, D1, Pages, DNS)
+
+**Previous Broken Entries (Removed):**
+- The 5 individual direct-SSE Cloudflare MCP entries were removed due to architecture mismatch
+- Now using the official `@cloudflare/mcp-server-cloudflare` package instead
+
+## 🎯 Currently Configured MCP Servers
+
+### 1. Tavily Search Server
+- **Server Name:** `tavily`
+- **Purpose:** Web search using Tavily AI search API
+- **Type:** stdio
+- **Command:** `node /home/cmndcntrl/Documents/Cline/MCP/tavily-server/build/index.js`
+- **Authentication:** API Key required (configured in env)
+- **Auto-approve:** `tavily_search` tool
 
 **Key Capabilities:**
-- Create and manage KV namespaces
-- Configure R2 bucket bindings
-- Set up D1 database connections
-- Manage Durable Object bindings
-- Configure Workers AI bindings
+- Search the web with high-quality results
+- Basic and advanced search depth options
+- Domain filtering (include/exclude)
+- Configurable result limits
 
 **Example Usage:**
+```javascript
+await use_mcp_tool({
+  server_name: "tavily",
+  tool_name: "tavily_search",
+  arguments: {
+    query: "latest Node.js features",
+    search_depth: "basic",
+    max_results: 5
+  }
+});
+```
+
+### 2. ProxmoxMCP Server
+- **Server Name:** `github.com/canvrno/ProxmoxMCP`
+- **Purpose:** Proxmox VE cluster management and VM operations
+- **Type:** stdio
+- **Command:** Python module in virtual environment
+- **Authentication:** Configured via proxmox-config/config.json
+
+**Key Capabilities:**
+- Get cluster nodes and status
+- List and manage VMs
+- Execute commands in VMs via QEMU guest agent
+- Manage storage pools
+- Check cluster health
+
+**Example Usage:**
+```javascript
+await use_mcp_tool({
+  server_name: "github.com/canvrno/ProxmoxMCP",
+  tool_name: "get_vms",
+  arguments: {}
+});
+```
+
+## 🔧 Cloudflare MCP Server
+
+### 3. Cloudflare Infrastructure Server
+- **Server Name:** `@cloudflare/mcp-server-cloudflare`
+- **Purpose:** Comprehensive Cloudflare infrastructure management
+- **Type:** stdio (npx package)
+- **Command:** `npx -y @cloudflare/mcp-server-cloudflare`
+- **Authentication:** API Token + Account ID
+
+**Key Capabilities:**
+
+**Workers Management:**
+- Deploy and update Workers
+- List and manage Workers
+- View logs and metrics
+
+**KV Namespace Operations:**
+- Create/delete KV namespaces
+- Read/write KV entries
+- List namespaces and keys
+
+**R2 Bucket Management:**
+- Create/delete R2 buckets
+- Upload/download objects
+- List buckets and manage objects
+
+**D1 Database Operations:**
+- Create/manage D1 databases
+- Execute SQL queries
+- Manage schemas and migrations
+
+**Pages Deployment:**
+- Deploy to Cloudflare Pages
+- Manage deployments and rollbacks
+- View deployment logs
+
+**DNS Management:**
+- Add/update/delete DNS records
+- List zones and records
+- Manage DNS configurations
+
+### Example Usage
+
 ```javascript
 // List all KV namespaces
 await use_mcp_tool({
-  server_name: "github.com/cloudflare/mcp-server-cloudflare",
+  server_name: "@cloudflare/mcp-server-cloudflare",
   tool_name: "list_kv_namespaces",
   arguments: {
-    account_id: process.env.CF_ACCOUNT_ID
+    account_id: "27e1b1a898bcee51303504e20ac5d743"
   }
 });
-```
 
-#### 2. Browser Rendering Server
-- **URL:** `https://browser.mcp.cloudflare.com/sse`
-- **Purpose:** Web page rendering, screenshots, browser automation, markdown conversion
-- **Authentication:** Required (OAuth)
-- **Used By:** Frontend Core, QA, DevOps agents
-
-**Key Capabilities:**
-- Fetch and render web pages
-- Convert HTML to markdown
-- Take screenshots of URLs
-- Execute browser automation scripts
-- Validate responsive designs
-
-**Example Usage:**
-```javascript
-// Take screenshot of a webpage
+// Create a new KV namespace
 await use_mcp_tool({
-  server_name: "github.com/cloudflare/mcp-server-cloudflare",
-  tool_name: "screenshot",
+  server_name: "@cloudflare/mcp-server-cloudflare",
+  tool_name: "create_kv_namespace",
   arguments: {
-    url: "https://example.com",
-    viewport: { width: 1280, height: 800 }
+    account_id: "27e1b1a898bcee51303504e20ac5d743",
+    title: "my-application-cache"
+  }
+});
+
+// List R2 buckets
+await use_mcp_tool({
+  server_name: "@cloudflare/mcp-server-cloudflare",
+  tool_name: "list_r2_buckets",
+  arguments: {
+    account_id: "27e1b1a898bcee51303504e20ac5d743"
   }
 });
 ```
-
-#### 3. Documentation Server
-- **URL:** `https://docs.mcp.cloudflare.com/sse`
-- **Purpose:** Access up-to-date Cloudflare documentation
-- **Authentication:** Not required
-- **Used By:** All agents (for reference)
-
-**Key Capabilities:**
-- Search Cloudflare documentation
-- Get API reference information
-- Access code examples
-- Find best practices
-
-### High Priority Servers
-
-#### 4. Observability Server
-- **URL:** `https://observability.mcp.cloudflare.com/sse`
-- **Purpose:** Access logs, analytics, and debugging information
-- **Authentication:** Required (OAuth + API Token)
-- **Used By:** DevOps, QA, Backend Integration agents
-
-**Key Capabilities:**
-- Query application logs
-- Access analytics data
-- Monitor Workers metrics
-- Debug production issues
-- Track error rates
-
-#### 5. Workers Builds Server
-- **URL:** `https://builds.mcp.cloudflare.com/sse`
-- **Purpose:** CI/CD pipeline insights and build management
-- **Authentication:** Required (OAuth + API Token)
-- **Used By:** DevOps, Architecture Lead agents
-
-**Key Capabilities:**
-- Monitor build status
-- Access deployment logs
-- Track build history
-- Manage deployments
-- Rollback builds
 
 ## 🤖 Agent Integration Matrix
 
 | Agent | Primary MCP Servers | Use Cases |
 |-------|-------------------|-----------|
-| **Architecture Lead** | Workers Bindings, Documentation | Infrastructure design, binding configuration, architecture documentation |
-| **Frontend Core** | Browser Rendering, Documentation | Visual testing, screenshot validation, responsive design checks |
-| **Backend Integration** | Workers Bindings, Observability | KV/R2/D1 management, API debugging, performance monitoring |
-| **QA Agent** | Browser Rendering, Observability | E2E testing, visual regression, log analysis |
-| **DevOps Engineer** | Workers Builds, Observability | CI/CD monitoring, deployment tracking, infrastructure logs |
-| **MCP Integration** | All servers | Tool orchestration, cross-service coordination |
+| **All Agents** | Tavily | Web research, documentation lookup, latest information |
+| **Architecture Lead** | Cloudflare, Tavily | Infrastructure design, Workers/KV/R2/D1 setup, best practices |
+| **DevOps Engineer** | Cloudflare, ProxmoxMCP | Deployments, DNS management, VM operations, CI/CD |
+| **Backend Integration** | Cloudflare, ProxmoxMCP | Workers APIs, D1 databases, KV storage, VM commands |
+| **Frontend Core** | Cloudflare | Pages deployment, asset management, edge functions |
+| **QA Agent** | Tavily, Cloudflare | Research testing strategies, deployment verification |
+| **MCP Integration** | All servers | Cross-platform orchestration, unified infrastructure control |
 
 ## 🔐 Authentication Configuration
 
@@ -145,19 +193,46 @@ CF_ACCESS_AUD_RESEARCH=bd657082ae913c648b34e76b7b3d3a9a7d7eab390a4b159e5afb1e5f8
 CF_ACCESS_JWK_URL=https://c3s.cloudflareaccess.com/cdn-cgi/access/certs
 ```
 
-### Cline MCP Settings
+### Current Cline MCP Settings
 
-The MCP portal is configured in `~/.config/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json`:
+The MCP configuration is stored in `~/.config/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json`:
 
 ```json
 {
   "mcpServers": {
-    "github.com/cloudflare/mcp-server-cloudflare": {
-      "command": "npx",
-      "args": ["-y", "mcp-remote", "https://mcp.c3s.nexus/sse"],
+    "tavily": {
+      "autoApprove": ["tavily_search"],
+      "disabled": false,
+      "timeout": 60,
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "/home/cmndcntrl/Documents/Cline/MCP/tavily-server/build/index.js"
+      ],
       "env": {
-        "CF_API_TOKEN": "10I7G0T2INllodt4SVWoRRyWddAzMpmBq_IyNb4v",
-        "CF_ACCOUNT_ID": "27e1b1a898bcee51303504e20ac5d743"
+        "TAVILY_API_KEY": "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"
+      }
+    },
+    "github.com/canvrno/ProxmoxMCP": {
+      "autoApprove": [],
+      "disabled": false,
+      "timeout": 60,
+      "type": "stdio",
+      "command": "/home/cmndcntrl/Documents/Cline/MCP/ProxmoxMCP/.venv/bin/python",
+      "args": ["-m", "proxmox_mcp.server"],
+      "cwd": "/home/cmndcntrl/Documents/Cline/MCP/ProxmoxMCP",
+      "env": {
+        "PYTHONPATH": "/home/cmndcntrl/Documents/Cline/MCP/ProxmoxMCP/src",
+        "PROXMOX_MCP_CONFIG": "/home/cmndcntrl/Documents/Cline/MCP/ProxmoxMCP/proxmox-config/config.json",
+        "LOG_LEVEL": "DEBUG"
+      }
+    },
+    "@cloudflare/mcp-server-cloudflare": {
+      "command": "npx",
+      "args": ["-y", "@cloudflare/mcp-server-cloudflare"],
+      "env": {
+        "CLOUDFLARE_API_TOKEN": "10I7G0T2INllodt4SVWoRRyWddAzMpmBq_IyNb4v",
+        "CLOUDFLARE_ACCOUNT_ID": "27e1b1a898bcee51303504e20ac5d743"
       },
       "autoApprove": [],
       "disabled": false,
@@ -170,162 +245,154 @@ The MCP portal is configured in `~/.config/Code/User/globalStorage/saoudrizwan.c
 
 ## 🚀 Usage Examples
 
-### Example 1: Deploy Workers Application with Bindings
+### Example 1: Web Research with Tavily
 
 ```javascript
-// Architecture Lead Agent workflow
-const deploymentConfig = {
-  bindings: {
-    kv: ["USER_SESSIONS", "API_CACHE"],
-    r2: ["STATIC_ASSETS"],
-    d1: ["APPLICATION_DB"],
-    ai: ["WORKERS_AI"]
-  }
-};
-
-// Use MCP to configure bindings
-for (const kv of deploymentConfig.bindings.kv) {
-  await use_mcp_tool({
-    server_name: "github.com/cloudflare/mcp-server-cloudflare",
-    tool_name: "create_kv_namespace",
-    arguments: {
-      account_id: process.env.CF_ACCOUNT_ID,
-      title: kv
-    }
-  });
-}
-```
-
-### Example 2: Visual Regression Testing
-
-```javascript
-// QA Agent workflow
-const testUrls = [
-  "http://localhost:3000",
-  "http://localhost:3000/dashboard",
-  "http://localhost:3000/projects"
-];
-
-for (const url of testUrls) {
-  const screenshot = await use_mcp_tool({
-    server_name: "github.com/cloudflare/mcp-server-cloudflare",
-    tool_name: "screenshot",
-    arguments: {
-      url,
-      viewport: { width: 1920, height: 1080 },
-      full_page: true
-    }
-  });
-  
-  // Compare with baseline
-  await compareScreenshots(screenshot, baseline);
-}
-```
-
-### Example 3: Production Debugging
-
-```javascript
-// DevOps Agent workflow
-// Check recent errors in logs
-const logs = await use_mcp_tool({
-  server_name: "github.com/cloudflare/mcp-server-cloudflare",
-  tool_name: "query_logs",
+// Research latest best practices
+const results = await use_mcp_tool({
+  server_name: "tavily",
+  tool_name: "tavily_search",
   arguments: {
-    worker_name: "dev-team-api",
-    time_range: "1h",
-    level: "error"
+    query: "Node.js microservices best practices 2025",
+    search_depth: "advanced",
+    max_results: 10
   }
 });
 
-// Analyze error patterns
-const errorAnalysis = analyzeLogs(logs);
+// Process results
+results.forEach(result => {
+  console.log(`${result.title}: ${result.url}`);
+  console.log(result.content);
+});
+```
 
-// If critical, trigger rollback
-if (errorAnalysis.criticalErrors > 10) {
-  await use_mcp_tool({
-    server_name: "github.com/cloudflare/mcp-server-cloudflare",
-    tool_name: "rollback_deployment",
-    arguments: {
-      worker_name: "dev-team-api",
-      version: "previous"
-    }
-  });
-}
+### Example 2: Proxmox VM Management
+
+```javascript
+// Check cluster health
+const nodes = await use_mcp_tool({
+  server_name: "github.com/canvrno/ProxmoxMCP",
+  tool_name: "get_nodes",
+  arguments: {}
+});
+
+// Get all VMs
+const vms = await use_mcp_tool({
+  server_name: "github.com/canvrno/ProxmoxMCP",
+  tool_name: "get_vms",
+  arguments: {}
+});
+
+// Execute command in specific VM
+const result = await use_mcp_tool({
+  server_name: "github.com/canvrno/ProxmoxMCP",
+  tool_name: "execute_vm_command",
+  arguments: {
+    node: "pve1",
+    vmid: "100",
+    command: "systemctl status nginx"
+  }
+});
+```
+
+### Example 3: Combined Research and Infrastructure
+
+```javascript
+// Research then implement
+const research = await use_mcp_tool({
+  server_name: "tavily",
+  tool_name: "tavily_search",
+  arguments: {
+    query: "Docker container optimization techniques",
+    search_depth: "advanced"
+  }
+});
+
+// Apply findings to Proxmox VMs
+const vmStatus = await use_mcp_tool({
+  server_name: "github.com/canvrno/ProxmoxMCP",
+  tool_name: "execute_vm_command",
+  arguments: {
+    node: "pve1",
+    vmid: "100",
+    command: "docker stats --no-stream"
+  }
+});
 ```
 
 ## 🔧 Setup Instructions
 
-### Step 1: Configure MCP Portal in Cloudflare
+### Verifying Current Configuration
 
-1. Navigate to **Cloudflare Zero Trust** dashboard
-2. Go to **Access** → **Applications** → **AI controls** → **MCP servers**
-3. Add each required MCP server:
-   - Click "Add an MCP server"
-   - Enter server name (e.g., "cloudflare-bindings")
-   - Enter HTTP URL (e.g., `https://bindings.mcp.cloudflare.com/sse`)
-   - Complete OAuth authentication if required
-   - Save configuration
+1. **Check MCP Status in Cline:**
+   - Open VS Code with Cline extension
+   - Look for "Connected MCP Servers" section
+   - Should show: Tavily ✅ and ProxmoxMCP ✅
 
-### Step 2: Verify Configuration
+2. **Test MCP Tools:**
+   ```bash
+   # If you have a test script
+   node scripts/test-mcp-connection.js
+   ```
 
-Restart your development environment and verify the MCP connection:
+### Adding New MCP Servers
 
-```bash
-# Restart Cline/VS Code to load new MCP configuration
-# Check that the Cloudflare MCP server appears in the "Connected MCP Servers" section
-```
+To add additional MCP servers:
 
-### Step 3: Test MCP Tools
+1. **Edit settings file:**
+   ```bash
+   code ~/.config/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json
+   ```
 
-Use the test script to validate connectivity:
+2. **Add server configuration:**
+   - Follow the format of existing entries
+   - Specify command, args, and env variables
+   - Set timeout and type appropriately
 
-```bash
-node scripts/test-mcp-connection.js
-```
+3. **Restart VS Code/Cline:**
+   - Close and reopen VS Code
+   - Check MCP status panel for new server
 
 ## 🐛 Troubleshooting
 
 ### Common Issues
 
-#### 1. "Not Connected" Error
+#### 1. "Server Not Connected" Error
 
-**Cause:** MCP portal URL incorrect or authentication failed
+**Cause:** MCP server process failed to start or crashed
 
 **Solution:**
-- Verify portal URL in `cline_mcp_settings.json`
-- Check CF_API_TOKEN is correct in environment
-- Ensure MCP servers are added to portal in Cloudflare dashboard
+- Check the command and args are correct in settings
+- Verify file paths exist (especially for tavily-server)
+- Check environment variables are set properly
+- Look for error logs in VS Code developer console
 
 #### 2. "Tool Not Found" Error
 
-**Cause:** Specific MCP server not configured in portal
+**Cause:** Trying to use a tool from a server that's not configured
 
 **Solution:**
-- Log in to Cloudflare Zero Trust dashboard
-- Navigate to MCP servers section
-- Add the missing server (e.g., Workers Bindings, Browser Rendering)
-- Complete OAuth authentication
+- Verify the server_name matches exactly (case-sensitive)
+- Check the server is listed in connected MCP servers
+- Confirm the tool name is correct for that server
 
-#### 3. Authentication Timeout
+#### 3. Python Module Not Found (ProxmoxMCP)
 
-**Cause:** API token expired or insufficient permissions
-
-**Solution:**
-- Generate new API token in Cloudflare dashboard
-- Ensure token has required permissions:
-  - Workers: Read/Write
-  - Account: Read
-  - Zone: Read (if needed)
-- Update CF_API_TOKEN in `.env`
-
-#### 4. Rate Limiting
-
-**Cause:** Too many requests to MCP servers
+**Cause:** Virtual environment or Python path issues
 
 **Solution:**
-- Implement request throttling in agent code
-- Use caching for frequently accessed data
-- Increase timeout values in `cline_mcp_settings.json`
+- Verify venv exists: `/home/cmndcntrl/Documents/Cline/MCP/ProxmoxMCP/.venv`
+- Check PYTHONPATH is set correctly in config
+- Ensure proxmox_mcp module is installed in venv
+
+#### 4. Tavily API Errors
+
+**Cause:** API key issues or rate limiting
+
+**Solution:**
+- Verify TAVILY_API_KEY is valid and not expired
+- Check Tavily API quota/limits
+- Ensure search parameters are within allowed ranges
 
 ### Debug Mode
 
@@ -400,6 +467,23 @@ Key metrics to track:
 
 ---
 
-**Last Updated:** January 6, 2025  
-**Configuration Version:** 1.0  
+**Last Updated:** January 10, 2025  
+**Configuration Version:** 2.1 (Cloudflare MCP Added)  
 **Author:** Dev Team Platform
+
+## 📝 Change History
+
+### Version 2.1 (January 10, 2025)
+- ✅ Added official Cloudflare MCP server (`@cloudflare/mcp-server-cloudflare`)
+- ✅ Now supports Workers, KV, R2, D1, Pages, and DNS management
+- ✅ Full Cloudflare infrastructure control via proper MCP integration
+
+### Version 2.0 (January 10, 2025)
+- ✅ Removed broken Cloudflare MCP entries (5 direct-SSE servers)
+- ✅ Corrected MCP-Nexus role (server manager, not portal)
+- ✅ Updated documentation to reflect actual architecture
+- ✅ Simplified to working servers only (Tavily + ProxmoxMCP)
+
+### Version 1.0 (January 6, 2025)
+- ❌ Incorrect Cloudflare portal architecture (removed)
+- ❌ MCP-Nexus mischaracterized as MCP gateway (corrected)
