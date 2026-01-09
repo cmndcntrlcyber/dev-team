@@ -1,7 +1,22 @@
+'use client';
+
 import React from 'react';
 
+// Task display interface for the progress component
+interface DisplayTask {
+  id?: string;
+  title: string;
+  description?: string;
+  priority?: string;
+  status?: string;
+  progress?: number;
+  assignee?: string;
+  dueDate?: string;
+  tags?: string[];
+}
+
 interface TaskProgressProps {
-  task: any;
+  task: DisplayTask;
 }
 
 export function TaskProgress({ task }: TaskProgressProps) {

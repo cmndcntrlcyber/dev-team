@@ -1,7 +1,10 @@
+'use client';
+
 import React from 'react';
+import type { Project } from '@/types';
 
 interface ProjectCardProps {
-  project: any;
+  project: Project;
 }
 
 export function ProjectCard({ project }: ProjectCardProps) {

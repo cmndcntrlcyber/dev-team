@@ -11,7 +11,7 @@ services:
       POSTGRES_PASSWORD: devteam_secure_password
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./infrastructure/database/init:/docker-entrypoint-initdb.d
@@ -213,6 +213,7 @@ services:
       AGENT_ID: architecture-lead-001
       AGENT_TYPE: ARCHITECTURE_LEAD
       NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
       ANTHROPIC_MODEL: claude-opus-4-1-20250805
       TAVILY_API_KEY: ${TAVILY_API_KEY}
@@ -244,6 +245,7 @@ services:
       AGENT_ID: frontend-core-001
       AGENT_TYPE: FRONTEND_CORE
       NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
       ANTHROPIC_MODEL: claude-sonnet-4-20250514:1M
       LOG_LEVEL: info
@@ -274,6 +276,7 @@ services:
       AGENT_ID: backend-integration-001
       AGENT_TYPE: BACKEND_INTEGRATION
       NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
       ANTHROPIC_MODEL: claude-sonnet-4-20250514:1M
       LOG_LEVEL: info
@@ -304,6 +307,7 @@ services:
       AGENT_ID: qa-001
       AGENT_TYPE: QUALITY_ASSURANCE
       NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
       ANTHROPIC_MODEL: claude-opus-4-1-20250805
       LOG_LEVEL: info
@@ -334,6 +338,7 @@ services:
       AGENT_ID: devops-001
       AGENT_TYPE: DEVOPS
       NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
       ANTHROPIC_MODEL: claude-sonnet-4-20250514:1M
       LOG_LEVEL: info
@@ -364,6 +369,7 @@ services:
       AGENT_ID: mcp-integration-001
       AGENT_TYPE: MCP_INTEGRATION
       NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
       ANTHROPIC_MODEL: claude-sonnet-4-20250514:1M
       LOG_LEVEL: info

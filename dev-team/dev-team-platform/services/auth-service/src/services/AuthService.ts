@@ -36,7 +36,8 @@ export class AuthService {
   constructor(
     private database: any,
     private redis: any,
-    private logger: any
+    private logger: any,
+    private fastify?: any
   ) {}
 
   async register(data: RegisterData): Promise<{ user: User; tokens: TokenPair }> {
@@ -297,9 +298,15 @@ export class AuthService {
   }
 
   private async generateJWT(payload: any, expiresIn: string): Promise<string> {
-    // This would use the fastify JWT instance in a real implementation
-    // For now, return a mock token structure
-    return `mock.jwt.token.${Date.now()}`;
+    if (this.fastify?.jwt) {
+      // Use fastify JWT for signing
+      return this.fastify.jwt.sign(payload, { expiresIn });
+    }
+
+    // Fallback: use jsonwebtoken directly if fastify not available
+    const jwt = require('jsonwebtoken');
+    const secret = process.env.JWT_SECRET || 'dev-secret-change-in-production';
+    return jwt.sign(payload, secret, { expiresIn });
   }
 
   async validateSession(userId: string): Promise<User | null> {

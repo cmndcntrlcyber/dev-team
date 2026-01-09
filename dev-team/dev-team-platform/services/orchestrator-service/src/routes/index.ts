@@ -1,19 +1,23 @@
 import { FastifyInstance } from 'fastify';
-import { 
-    AgentOrchestrator, 
-    SystemMetrics 
+import {
+    AgentOrchestrator,
+    SystemMetrics
 } from '../orchestrator/AgentOrchestrator';
 import { DatabaseManager } from '../database/DatabaseManager';
 import { MessageBroker } from '../messaging/MessageBroker';
-import { 
-    Logger, 
-    AgentTask, 
-    Project, 
-    ApiResponse, 
-    ValidationError, 
+import {
+    Logger,
+    AgentTask,
+    Project,
+    ApiResponse,
+    ValidationError,
     NotFoundError,
     PlatformError
 } from '../shared';
+import { registerAgentRoutes } from './agentRoutes';
+import { registerWorkflowRoutes } from './workflowRoutes';
+import { WorkflowExecutionEngine } from '../workflow/WorkflowExecutionEngine';
+import { v4 as uuid } from 'uuid';
 
 // Route schemas for validation
 const taskCreateSchema = {
@@ -54,37 +58,56 @@ const taskUpdateSchema = {
         properties: {
             title: { type: 'string', minLength: 1 },
             description: { type: 'string', minLength: 1 },
-            status: { 
-                type: 'string', 
+            status: {
+                type: 'string',
                 enum: [
-                    'NOT_STARTED', 'IN_PROGRESS', 'BLOCKED', 
-                    'REVIEW', 'TESTING', 'COMPLETED', 
+                    'NOT_STARTED', 'IN_PROGRESS', 'BLOCKED',
+                    'REVIEW', 'TESTING', 'COMPLETED',
                     'DEFERRED', 'CANCELLED'
-                ] 
+                ]
             },
-            priority: { 
-                type: 'string', 
-                enum: ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'] 
+            priority: {
+                type: 'string',
+                enum: ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']
             },
             assignedTo: { type: 'string' },
             dueDate: { type: 'string', format: 'date-time' },
             estimatedHours: { type: 'number', minimum: 0 },
             actualHours: { type: 'number', minimum: 0 },
-            tags: { 
-                type: 'array', 
-                items: { type: 'string' } 
+            tags: {
+                type: 'array',
+                items: { type: 'string' }
             },
             metadata: { type: 'object' }
         }
     }
 };
 
+// Status transition validation - defines valid state transitions
+const VALID_STATUS_TRANSITIONS: Record<string, string[]> = {
+    'NOT_STARTED': ['IN_PROGRESS', 'DEFERRED', 'CANCELLED'],
+    'IN_PROGRESS': ['BLOCKED', 'REVIEW', 'COMPLETED', 'DEFERRED', 'CANCELLED'],
+    'BLOCKED': ['IN_PROGRESS', 'DEFERRED', 'CANCELLED'],
+    'REVIEW': ['IN_PROGRESS', 'TESTING', 'COMPLETED', 'CANCELLED'],
+    'TESTING': ['IN_PROGRESS', 'COMPLETED', 'CANCELLED'],
+    'COMPLETED': [], // Terminal state - no transitions allowed
+    'DEFERRED': ['NOT_STARTED', 'IN_PROGRESS', 'CANCELLED'],
+    'CANCELLED': [] // Terminal state - no transitions allowed
+};
+
+function isValidStatusTransition(currentStatus: string, newStatus: string): boolean {
+    if (currentStatus === newStatus) return true; // No change is always valid
+    const validTransitions = VALID_STATUS_TRANSITIONS[currentStatus];
+    return validTransitions ? validTransitions.includes(newStatus) : false;
+}
+
 export async function registerRoutes(
     fastify: FastifyInstance,
     orchestrator: AgentOrchestrator,
     database: DatabaseManager,
     messageBroker: MessageBroker,
-    logger: Logger
+    logger: Logger,
+    workflowEngine?: WorkflowExecutionEngine
 ): Promise<void> {
     
     // Agent Management Routes
@@ -187,7 +210,7 @@ export async function registerRoutes(
         
         try {
             const task: AgentTask = {
-                id: `task_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                id: uuid(),
                 title: taskData.title,
                 description: taskData.description,
                 type: taskData.type,
@@ -304,11 +327,21 @@ export async function registerRoutes(
     fastify.put('/api/tasks/:taskId', { schema: taskUpdateSchema }, async (request, reply) => {
         const { taskId } = request.params as { taskId: string };
         const updates = request.body as any;
-        
+
         try {
             const existingTask = await database.getTask(taskId);
             if (!existingTask) {
                 throw new NotFoundError(`Task not found: ${taskId}`);
+            }
+
+            // Validate status transition if status is being changed
+            if (updates.status && updates.status !== existingTask.status) {
+                if (!isValidStatusTransition(existingTask.status, updates.status)) {
+                    throw new ValidationError(
+                        `Invalid status transition: ${existingTask.status} → ${updates.status}. ` +
+                        `Valid transitions from ${existingTask.status}: ${VALID_STATUS_TRANSITIONS[existingTask.status]?.join(', ') || 'none'}`
+                    );
+                }
             }
 
             const updatedTask: AgentTask = {
@@ -318,6 +351,14 @@ export async function registerRoutes(
                 updatedAt: new Date(),
                 dueDate: updates.dueDate ? new Date(updates.dueDate) : existingTask.dueDate
             };
+
+            // Auto-set timestamps based on status transitions
+            if (updates.status === 'IN_PROGRESS' && !existingTask.startedAt) {
+                updatedTask.startedAt = new Date();
+            }
+            if (updates.status === 'COMPLETED' && !existingTask.completedAt) {
+                updatedTask.completedAt = new Date();
+            }
 
             await database.updateTask(updatedTask);
 
@@ -333,7 +374,7 @@ export async function registerRoutes(
 
             reply.send(response);
         } catch (error) {
-            if (error instanceof NotFoundError) {
+            if (error instanceof NotFoundError || error instanceof ValidationError) {
                 throw error;
             }
             logger.error(`Failed to update task ${taskId}`, error as Error);
@@ -554,6 +595,147 @@ export async function registerRoutes(
                 reply.code(500).send({ success: false, error: 'Debug error' });
             }
         });
+    }
+
+    // User Settings Routes
+    fastify.get('/api/settings/:settingKey', async (request, reply) => {
+        const { settingKey } = request.params as { settingKey: string };
+        const { userId } = request.query as { userId?: string };
+
+        try {
+            // For now, use a default user if not specified
+            const effectiveUserId = userId || 'default';
+
+            const result = await database.query(
+                `SELECT setting_value FROM user_settings
+                 WHERE (user_id::text = $1 OR ($1 = 'default' AND user_id IS NULL))
+                 AND setting_key = $2`,
+                [effectiveUserId, settingKey]
+            );
+
+            const response: ApiResponse = {
+                success: true,
+                data: result.rows[0]?.setting_value || null,
+                meta: {
+                    timestamp: new Date(),
+                    requestId: request.requestId,
+                    version: '1.0.0'
+                }
+            };
+
+            reply.send(response);
+        } catch (error) {
+            logger.error(`Failed to get setting ${settingKey}`, error as Error);
+            throw new PlatformError(`Failed to retrieve setting: ${settingKey}`, 'SETTING_GET_ERROR', 500);
+        }
+    });
+
+    fastify.put('/api/settings/:settingKey', async (request, reply) => {
+        const { settingKey } = request.params as { settingKey: string };
+        const { userId, value } = request.body as { userId?: string; value: any };
+
+        try {
+            if (value === undefined) {
+                throw new ValidationError('Setting value is required');
+            }
+
+            const effectiveUserId = userId || null;
+
+            await database.query(
+                `INSERT INTO user_settings (user_id, setting_key, setting_value, updated_at)
+                 VALUES ($1, $2, $3, NOW())
+                 ON CONFLICT (user_id, setting_key)
+                 DO UPDATE SET setting_value = $3, updated_at = NOW()`,
+                [effectiveUserId, settingKey, JSON.stringify(value)]
+            );
+
+            const response: ApiResponse = {
+                success: true,
+                data: { settingKey, value },
+                meta: {
+                    timestamp: new Date(),
+                    requestId: request.requestId,
+                    version: '1.0.0'
+                }
+            };
+
+            reply.send(response);
+        } catch (error) {
+            if (error instanceof ValidationError) {
+                throw error;
+            }
+            logger.error(`Failed to save setting ${settingKey}`, error as Error);
+            throw new PlatformError(`Failed to save setting: ${settingKey}`, 'SETTING_SAVE_ERROR', 500);
+        }
+    });
+
+    // Convenience endpoint for agent order
+    fastify.get('/api/settings/agent-order', async (request, reply) => {
+        try {
+            const result = await database.query(
+                `SELECT setting_value FROM user_settings
+                 WHERE user_id IS NULL AND setting_key = 'agent_order'`
+            );
+
+            const response: ApiResponse = {
+                success: true,
+                data: result.rows[0]?.setting_value || [],
+                meta: {
+                    timestamp: new Date(),
+                    requestId: request.requestId,
+                    version: '1.0.0'
+                }
+            };
+
+            reply.send(response);
+        } catch (error) {
+            logger.error('Failed to get agent order', error as Error);
+            throw new PlatformError('Failed to retrieve agent order', 'AGENT_ORDER_GET_ERROR', 500);
+        }
+    });
+
+    fastify.put('/api/settings/agent-order', async (request, reply) => {
+        const { order } = request.body as { order: string[] };
+
+        try {
+            if (!Array.isArray(order)) {
+                throw new ValidationError('Order must be an array of agent IDs');
+            }
+
+            await database.query(
+                `INSERT INTO user_settings (user_id, setting_key, setting_value, updated_at)
+                 VALUES (NULL, 'agent_order', $1, NOW())
+                 ON CONFLICT (user_id, setting_key)
+                 DO UPDATE SET setting_value = $1, updated_at = NOW()`,
+                [JSON.stringify(order)]
+            );
+
+            const response: ApiResponse = {
+                success: true,
+                data: { order },
+                meta: {
+                    timestamp: new Date(),
+                    requestId: request.requestId,
+                    version: '1.0.0'
+                }
+            };
+
+            reply.send(response);
+        } catch (error) {
+            if (error instanceof ValidationError) {
+                throw error;
+            }
+            logger.error('Failed to save agent order', error as Error);
+            throw new PlatformError('Failed to save agent order', 'AGENT_ORDER_SAVE_ERROR', 500);
+        }
+    });
+
+    // Register agent CRUD routes
+    await registerAgentRoutes(fastify, orchestrator, database, logger);
+
+    // Register workflow routes (if workflow engine is provided)
+    if (workflowEngine) {
+        await registerWorkflowRoutes(fastify, workflowEngine, logger);
     }
 
     logger.info('All routes registered successfully');

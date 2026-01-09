@@ -19,6 +19,7 @@ import Deployments from "@/pages/deployments";
 import Releases from "@/pages/releases";
 import Login from "@/pages/login";
 import Sidebar from "@/components/sidebar";
+import AppHeader from "@/components/app-header";
 import { ErrorBoundary } from "@/components/error-boundary";
 
 function Router() {
@@ -39,7 +40,8 @@ function Router() {
   return (
     <div className="flex min-h-screen bg-dark">
       <Sidebar />
-      <div className="flex-1 ml-64">
+      <AppHeader />
+      <div className="flex-1 ml-64 mt-16">
         <Switch>
           <Route path="/" component={Dashboard} />
           <Route path="/projects" component={Projects} />

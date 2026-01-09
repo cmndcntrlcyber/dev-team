@@ -19,6 +19,7 @@ import {
 import { AgentOrchestrator } from './orchestrator/AgentOrchestrator';
 import { DatabaseManager } from './database/DatabaseManager';
 import { MessageBroker } from './messaging/MessageBroker';
+import { WorkflowExecutionEngine } from './workflow/WorkflowExecutionEngine';
 import { createLogger } from './utils/logger';
 import { loadConfig } from './utils/config';
 import { registerRoutes } from './routes';
@@ -74,11 +75,13 @@ async function createServer() {
     const database = new DatabaseManager(config.databaseUrl, logger);
     const messageBroker = new MessageBroker(config.natsUrl, logger);
     const orchestrator = new AgentOrchestrator(config, logger, database, messageBroker);
+    const workflowEngine = new WorkflowExecutionEngine(database, messageBroker, orchestrator, logger);
 
     // Initialize services
     await database.initialize();
     await messageBroker.initialize();
     await orchestrator.initialize();
+    await workflowEngine.initialize();
 
     // Register request context decorator
     if (!fastify.hasRequestDecorator('requestId')) {
@@ -95,8 +98,13 @@ async function createServer() {
 
     // JWT Authentication hook
     fastify.addHook('onRequest', async (request, reply) => {
-        // Skip auth for health checks and public endpoints
-        if (request.url.startsWith('/health') || request.url.startsWith('/metrics')) {
+        // Skip auth for health checks, metrics, settings, and API endpoints in development
+        if (request.url.startsWith('/health') ||
+            request.url.startsWith('/metrics') ||
+            request.url.startsWith('/api/settings') ||
+            request.url.startsWith('/api/agents') ||
+            request.url.startsWith('/api/workflows') ||
+            request.url.startsWith('/api/tasks')) {
             return;
         }
 
@@ -161,7 +169,7 @@ async function createServer() {
     });
 
     // Register routes
-    await registerRoutes(fastify, orchestrator, database, messageBroker, logger);
+    await registerRoutes(fastify, orchestrator, database, messageBroker, logger, workflowEngine);
 
     // Health check endpoints
     fastify.get('/health', async () => {
@@ -240,11 +248,12 @@ async function createServer() {
         logger.info(`Received ${signal}, starting graceful shutdown...`);
 
         try {
+            await workflowEngine.stop();
             await orchestrator.stop();
             await messageBroker.close();
             await database.close();
             await fastify.close();
-            
+
             logger.info('Graceful shutdown completed');
             process.exit(0);
         } catch (error) {

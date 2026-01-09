@@ -438,6 +438,171 @@ Update `memory-bank/dev-team-integration/integration-patterns.md`:
 - Poll less frequently for long-running tasks
 - Cache agent capabilities list
 
+## 11. Chrome DevTools Integration for Browser-Based Tasks
+
+**When to Use Chrome DevTools MCP:**
+
+### ✅ Use Chrome DevTools For:
+- **Debugging**: Console errors, JavaScript issues, DOM inspection
+- **Troubleshooting**: Network failures, performance bottlenecks, form issues
+- **UI/UX Testing**: Responsive design, visual regression, user flows
+- **Accessibility**: WCAG compliance checks, keyboard navigation
+- **Performance**: Core Web Vitals analysis, load time optimization
+
+### 🚀 Chrome Startup Protocol
+
+Before using Chrome DevTools tools, ensure Chrome is running:
+
+```bash
+# Check Chrome status
+/home/cmndcntrl/code/dev-team/scripts/chrome-launcher.sh status
+
+# Start if not running
+/home/cmndcntrl/code/dev-team/scripts/chrome-launcher.sh start
+```
+
+### 📋 Common Chrome DevTools Workflows
+
+#### Debugging Console Errors
+```
+1. Use cgIazK0mcp0navigate_page to open page
+2. Use cgIazK0mcp0list_console_messages with types=['error']
+3. Use cgIazK0mcp0get_network_request for failed API calls
+4. Use cgIazK0mcp0take_screenshot to document state
+5. Compile findings into debug report
+```
+
+#### Performance Analysis
+```
+1. Use cgIazK0mcp0performance_start_trace with reload=true
+2. Wait for page load completion
+3. Use cgIazK0mcp0performance_stop_trace
+4. Use cgIazK0mcp0performance_analyze_insight for metrics
+5. Generate performance recommendations
+```
+
+#### Responsive Design Testing
+```
+For each device size (mobile, tablet, desktop):
+1. Use cgIazK0mcp0resize_page to set viewport
+2. Use cgIazK0mcp0navigate_page to load page
+3. Use cgIazK0mcp0take_screenshot with fullPage=true
+4. Document layout issues
+5. Compare across breakpoints
+```
+
+#### E2E User Flow Testing
+```
+1. Use cgIazK0mcp0navigate_page to start URL
+2. Use cgIazK0mcp0fill_form for input fields
+3. Use cgIazK0mcp0click for buttons/links
+4. Use cgIazK0mcp0wait_for to verify state changes
+5. Use cgIazK0mcp0list_console_messages to catch errors
+6. Use cgIazK0mcp0take_screenshot at each step
+```
+
+### 🎯 Agent-Specific Chrome DevTools Usage
+
+#### QA Agent
+**Primary Use Cases:**
+- Automated E2E testing of user flows
+- Visual regression detection
+- Cross-browser/device testing
+- Accessibility validation
+- Performance benchmarking
+
+**Task Assignment Pattern:**
+```javascript
+{
+  "title": "E2E Test: User Registration Flow",
+  "description": "Use Chrome DevTools to test signup:\n1. Navigate to /signup\n2. Fill form fields\n3. Submit and verify\n4. Capture screenshots\n5. Check for console errors",
+  "assignedTo": "qa",
+  "tools": ["chrome-devtools"]
+}
+```
+
+#### Frontend Agent
+**Primary Use Cases:**
+- Debug broken UI components
+- Verify responsive design implementations
+- Profile JavaScript performance
+- Check CSS rendering issues
+- Validate client-side logic
+
+**Task Assignment Pattern:**
+```javascript
+{
+  "title": "Debug Navigation Component",
+  "description": "Component not rendering correctly:\n1. Inspect DOM structure\n2. Check console for JS errors\n3. Verify CSS styles\n4. Test across breakpoints\n5. Document findings",
+  "assignedTo": "frontend",
+  "tools": ["chrome-devtools"]
+}
+```
+
+#### DevOps Agent
+**Primary Use Cases:**
+- Health check deployed applications
+- Monitor production performance
+- Validate SSL/TLS configurations
+- Check CDN and caching behavior
+- Verify deployment success
+
+**Task Assignment Pattern:**
+```javascript
+{
+  "title": "Production Health Check",
+  "description": "Verify deployment:\n1. Check page loads successfully\n2. Monitor network requests\n3. Capture performance metrics\n4. Verify no console errors\n5. Generate health report",
+  "assignedTo": "devops",
+  "tools": ["chrome-devtools"]
+}
+```
+
+### ⚠️ Chrome DevTools Best Practices
+
+1. **Always start Chrome before using tools**
+   ```bash
+   /home/cmndcntrl/code/dev-team/scripts/chrome-launcher.sh start
+   ```
+
+2. **Take screenshots for visual documentation**
+   - Use `cgIazK0mcp0take_screenshot` at key checkpoints
+   - Include fullPage=true for complete views
+   - Save to project directory for reference
+
+3. **Monitor console for errors**
+   - Use `cgIazK0mcp0list_console_messages` regularly
+   - Filter by type (error, warning, log)
+   - Document error messages and stack traces
+
+4. **Capture network activity**
+   - Use `cgIazK0mcp0list_network_requests` for API debugging
+   - Check for failed requests (4xx, 5xx status codes)
+   - Verify request/response payloads
+
+5. **Include accessibility checks**
+   - Use `cgIazK0mcp0take_snapshot` for DOM + ARIA info
+   - Verify keyboard navigation with `cgIazK0mcp0press_key`
+   - Check contrast ratios and semantic HTML
+
+### 🔧 Troubleshooting Chrome DevTools
+
+**Chrome Not Responding:**
+```bash
+# Restart Chrome
+/home/cmndcntrl/code/dev-team/scripts/chrome-launcher.sh restart
+```
+
+**Tools Not Available:**
+1. Verify Chrome is running on port 9222
+2. Restart VS Code to reload MCP configuration
+3. Check Cline MCP settings for chrome-devtools entry
+
+**Page Not Loading:**
+- Check URL is accessible
+- Verify network connectivity
+- Increase timeout if needed
+- Check for authentication requirements
+
 ## 🚨 Critical Reminders
 
 1. **ALWAYS check service status at startup**
@@ -446,6 +611,7 @@ Update `memory-bank/dev-team-integration/integration-patterns.md`:
 4. **UPDATE memory bank after successful projects**
 5. **MONITOR task progress actively**
 6. **DOCUMENT patterns and learnings**
+7. **START Chrome before using DevTools MCP tools**
 
 ## 📊 Success Metrics
 

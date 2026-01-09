@@ -1,9 +1,22 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useCreateTask } from '@/hooks/useTasks';
+import { useAgents } from '@/hooks/useAgents';
+
+// Task submission data structure
+interface TaskSubmissionData {
+  title: string;
+  description: string;
+  priority: string;
+  targetAgent: string;
+  dueDate: string | null;
+  tags: string[];
+  requirements: string;
+}
 
 interface TaskSubmissionFormProps {
-  onSubmit?: (task: any) => void;
+  onSubmit?: (task: TaskSubmissionData) => void;
   onClose?: () => void;
 }
 
@@ -19,15 +32,18 @@ export function TaskSubmissionForm({ onSubmit, onClose }: TaskSubmissionFormProp
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
-  const agents = [
-    { id: 'architecture-lead', name: 'Architecture Lead Agent', description: 'Project planning & coordination' },
-    { id: 'frontend-core', name: 'Frontend Core Agent', description: 'UI/UX development' },
-    { id: 'backend-integration', name: 'Backend Integration Agent', description: 'Server-side development' },
-    { id: 'qa', name: 'Quality Assurance Agent', description: 'Testing & quality control' },
-    { id: 'devops', name: 'DevOps Agent', description: 'Deployment & infrastructure' },
-    { id: 'mcp-integration', name: 'MCP Integration Agent', description: 'External integrations' },
-  ];
+  const createTask = useCreateTask();
+  const { data: agentsList = [] } = useAgents();
+
+  // Map agents to dropdown format
+  const agents = agentsList.map(agent => ({
+    id: agent.id,
+    name: agent.name,
+    description: agent.type?.replace(/_/g, ' ') || 'AI Agent'
+  }));
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -37,31 +53,52 @@ export function TaskSubmissionForm({ onSubmit, onClose }: TaskSubmissionFormProp
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setSubmitError(null);
+    setSubmitSuccess(false);
 
     try {
       const taskData = {
-        ...formData,
+        title: formData.title,
+        description: formData.description + (formData.requirements ? `\n\nRequirements:\n${formData.requirements}` : ''),
+        priority: formData.priority,
+        assignedTo: formData.targetAgent || undefined,
+        dueDate: formData.dueDate || undefined,
         tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0),
-        dueDate: formData.dueDate ? new Date(formData.dueDate).toISOString() : null
+        type: 'CODE_GENERATION',
       };
 
-      // In a real implementation, this would call the API
+      // Call the API through the mutation
+      await createTask.mutateAsync(taskData);
+
+      // Show success message
+      setSubmitSuccess(true);
+
+      // Call optional onSubmit callback
       if (onSubmit) {
-        onSubmit(taskData);
+        onSubmit({
+          ...formData,
+          tags: taskData.tags,
+          dueDate: formData.dueDate || null
+        });
       }
 
-      // Reset form
-      setFormData({
-        title: '',
-        description: '',
-        priority: 'MEDIUM',
-        targetAgent: '',
-        dueDate: '',
-        tags: '',
-        requirements: ''
-      });
+      // Reset form after short delay to show success
+      setTimeout(() => {
+        setFormData({
+          title: '',
+          description: '',
+          priority: 'MEDIUM',
+          targetAgent: '',
+          dueDate: '',
+          tags: '',
+          requirements: ''
+        });
+        setSubmitSuccess(false);
+        onClose?.();
+      }, 1500);
     } catch (error) {
       console.error('Failed to submit task:', error);
+      setSubmitError(error instanceof Error ? error.message : 'Failed to create task. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -250,6 +287,29 @@ export function TaskSubmissionForm({ onSubmit, onClose }: TaskSubmissionFormProp
               </div>
             </div>
           </div>
+
+          {/* Error/Success Messages */}
+          {submitError && (
+            <div className="bg-red-500 bg-opacity-10 border border-red-500 rounded-lg p-4">
+              <div className="flex items-center space-x-2">
+                <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-red-500 font-medium">{submitError}</span>
+              </div>
+            </div>
+          )}
+
+          {submitSuccess && (
+            <div className="bg-green-500 bg-opacity-10 border border-green-500 rounded-lg p-4">
+              <div className="flex items-center space-x-2">
+                <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="text-green-500 font-medium">Task submitted successfully!</span>
+              </div>
+            </div>
+          )}
 
           {/* Submit Buttons */}
           <div className="flex justify-end space-x-4 pt-6 border-t border-primary-blue border-opacity-10">

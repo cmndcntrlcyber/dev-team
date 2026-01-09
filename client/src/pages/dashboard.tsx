@@ -3,15 +3,13 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import StatsCard from "@/components/stats-card";
 import AiAgentStatus from "@/components/ai-agent-status";
-import { Briefcase, CheckSquare, Bug, Rocket, Plus, Bell, Info, GitBranch } from "lucide-react";
+import { Briefcase, CheckSquare, Bug, Rocket, Plus, GitBranch } from "lucide-react";
 import TaskDialog from "@/components/dialogs/task-dialog";
 import StatsSkeleton from "@/components/ui/stats-skeleton";
 
 export default function Dashboard() {
-  const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   
   const { data: stats, isLoading: statsLoading } = useQuery({
@@ -34,25 +32,8 @@ export default function Dashboard() {
     queryKey: ["/api/ai-agents"],
   });
 
-  const { data: notifications = [] } = useQuery({
-    queryKey: ["/api/notifications"],
-  });
-
-  const { data: recentActivity = [] } = useQuery({
-    queryKey: ["/api/dashboard/activity"],
-  });
-
-  const activeProjects = projects.filter((p: any) => p.status === 'active').slice(0, 5);
-  const recentTasks = tasks.slice(0, 5);
-  const agentsList = aiAgents.slice(0, 6);
-
-  const handleMarkAllAsRead = () => {
-    setUnreadNotifications(0);
-  };
-
-  const handleNotificationClick = (notificationId: number) => {
-    console.log('Notification clicked:', notificationId);
-  };
+  const activeProjects = (projects as any[]).filter((p: any) => p.status === 'active').slice(0, 5);
+  const agentsList = (aiAgents as any[]).slice(0, 6);
 
   if (statsLoading) {
     return (
@@ -72,88 +53,22 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-dark">
-      {/* Header */}
-      <header className="bg-surface border-b border-gray-700 px-6 py-4">
+      {/* Page Header */}
+      <div className="bg-surface border-b border-gray-700 px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-gray-100">Dashboard</h2>
             <p className="text-gray-400 mt-1">Welcome back, Developer</p>
           </div>
-          <div className="flex items-center space-x-4">
-            <Button 
-              className="bg-primary hover:bg-primary/90 text-white"
-              onClick={() => setTaskDialogOpen(true)}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              New Task
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <div className="relative">
-                  <Button variant="outline" size="icon" className="bg-card border-gray-600 text-gray-100 hover:bg-gray-700">
-                    <Bell className="h-4 w-4" />
-                  </Button>
-                  {unreadNotifications > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-error text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                      {unreadNotifications}
-                    </span>
-                  )}
-                </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-96 bg-surface border-gray-700" align="end">
-                <DropdownMenuLabel className="flex items-center justify-between p-4 pb-2">
-                  <span className="text-lg font-semibold text-gray-100">Notifications</span>
-                  {unreadNotifications > 0 && (
-                    <Button
-                      variant="link"
-                      size="sm"
-                      className="text-primary hover:text-primary/80 p-0 h-auto"
-                      onClick={handleMarkAllAsRead}
-                    >
-                      Mark all as read
-                    </Button>
-                  )}
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-gray-700" />
-                
-                <div className="max-h-96 overflow-y-auto">
-                  {notifications.length === 0 ? (
-                    <div className="p-8 text-center text-gray-400">
-                      No new notifications
-                    </div>
-                  ) : (
-                    notifications.map((notification: any) => (
-                      <DropdownMenuItem
-                        key={notification.id}
-                        className="p-4 cursor-pointer hover:bg-card focus:bg-card"
-                        onClick={() => handleNotificationClick(notification.id)}
-                      >
-                        <div className="flex items-start space-x-3 w-full">
-                          <Info className="h-5 w-5 mt-0.5 text-primary" />
-                          <div className="flex-1 space-y-1">
-                            <p className="text-sm font-medium text-gray-100">
-                              {notification.title}
-                            </p>
-                            <p className="text-sm text-gray-400 line-clamp-2">
-                              {notification.message}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              {notification.time}
-                            </p>
-                          </div>
-                        </div>
-                      </DropdownMenuItem>
-                    ))
-                  )}
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white font-medium">
-              DV
-            </div>
-          </div>
+          <Button 
+            className="bg-primary hover:bg-primary/90 text-white"
+            onClick={() => setTaskDialogOpen(true)}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            New Task
+          </Button>
         </div>
-      </header>
+      </div>
 
       {/* Main Content */}
       <main className="p-6">

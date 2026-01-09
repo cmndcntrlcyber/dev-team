@@ -42,8 +42,9 @@ export interface AgentConfig {
 export interface BaseAgent {
   readonly id: AgentId;
   readonly type: AgentType;
+  name?: string;
   readonly capabilities: AgentCapabilities;
-  readonly status: AgentStatus;
+  status: AgentStatus;
   
   // Core lifecycle methods
   initialize(config: AgentConfig): Promise<void>;
@@ -466,6 +467,7 @@ export interface ResponseMetadata {
   requestId: string;
   version: string;
   pagination?: PaginationInfo;
+  total?: number;
 }
 
 export interface PaginationInfo {
@@ -605,6 +607,134 @@ export interface EventEmitter {
   emit(event: string, ...args: any[]): void;
   once(event: string, listener: (...args: any[]) => void): void;
 }
+
+// ============================================
+// Architecture Agent Output Types
+// ============================================
+
+/**
+ * Architecture Decision Record (ADR)
+ */
+export type ArchitectureDecisionStatus = 'PROPOSED' | 'ACCEPTED' | 'DEPRECATED' | 'SUPERSEDED';
+
+export interface ArchitectureDecisionAlternative {
+  option: string;
+  pros: string[];
+  cons: string[];
+  rejected: boolean;
+  reason?: string;
+}
+
+export interface ArchitectureDecision {
+  id: string;
+  title: string;
+  status: ArchitectureDecisionStatus;
+  context: string;
+  decision: string;
+  consequences: string[];
+  alternatives: ArchitectureDecisionAlternative[];
+  affectedAgents: AgentType[];
+  affectedAreas: string[];
+  createdAt: Date;
+  updatedAt?: Date;
+  supersededBy?: string;
+  projectId?: string;
+  createdBy?: AgentId;
+}
+
+/**
+ * Task Blueprint - Output from Architecture Agent when decomposing tasks
+ */
+export interface TaskBlueprintSubtask {
+  title: string;
+  description: string;
+  type: TaskType;
+  assignedAgentType: AgentType;
+  priority: TaskPriority;
+  estimatedHours: number;
+  dependencies: string[];
+  acceptanceCriteria: string[];
+  technicalNotes?: string;
+  metadata?: Record<string, any>;
+}
+
+export interface TaskBlueprint {
+  id: string;
+  parentTaskId: string;
+  projectId?: string;
+  subtasks: TaskBlueprintSubtask[];
+  sequencingStrategy: 'PARALLEL' | 'SEQUENTIAL' | 'DEPENDENCY_GRAPH';
+  criticalPath: string[];
+  estimatedTotalHours: number;
+  notes?: string;
+  createdAt: Date;
+  createdBy?: AgentId;
+}
+
+/**
+ * Code Standard
+ */
+export type CodeStandardCategory = 'NAMING' | 'STRUCTURE' | 'PATTERN' | 'TESTING' | 'DOCUMENTATION' | 'SECURITY';
+export type CodeStandardSeverity = 'ERROR' | 'WARNING' | 'INFO';
+
+export interface CodeStandardRule {
+  name: string;
+  description: string;
+  examples: { good: string; bad: string }[];
+  severity: CodeStandardSeverity;
+  autoFixable?: boolean;
+}
+
+export interface CodeStandard {
+  id: string;
+  category: CodeStandardCategory;
+  language: string;
+  framework?: string;
+  rules: CodeStandardRule[];
+  appliesTo: string[];
+  projectId?: string;
+  createdAt: Date;
+  updatedAt?: Date;
+  createdBy?: AgentId;
+}
+
+/**
+ * Architecture Review
+ */
+export type ArchitectureReviewVerdict = 'APPROVED' | 'CHANGES_REQUESTED' | 'REJECTED';
+export type ArchitectureReviewFindingType = 'ISSUE' | 'SUGGESTION' | 'PRAISE';
+export type ArchitectureReviewFindingSeverity = 'CRITICAL' | 'MAJOR' | 'MINOR' | 'INFO';
+
+export interface ArchitectureReviewFinding {
+  type: ArchitectureReviewFindingType;
+  severity: ArchitectureReviewFindingSeverity;
+  location?: string;
+  description: string;
+  recommendation?: string;
+  relatedDecision?: string;
+}
+
+export interface ArchitectureReview {
+  id: string;
+  taskId: string;
+  reviewerId: AgentId;
+  verdict: ArchitectureReviewVerdict;
+  findings: ArchitectureReviewFinding[];
+  architecturalConcerns: string[];
+  approvalConditions?: string[];
+  summary: string;
+  createdAt: Date;
+  projectId?: string;
+}
+
+/**
+ * Architecture Agent output union type
+ */
+export type ArchitectureAgentOutput =
+  | { type: 'DECISION'; data: ArchitectureDecision }
+  | { type: 'BLUEPRINT'; data: TaskBlueprint }
+  | { type: 'STANDARD'; data: CodeStandard }
+  | { type: 'REVIEW'; data: ArchitectureReview };
 
 // Export all types as a namespace for easier imports
 export * as Types from './index';

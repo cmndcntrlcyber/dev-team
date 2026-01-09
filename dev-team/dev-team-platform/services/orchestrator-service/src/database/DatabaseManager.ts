@@ -527,7 +527,15 @@ export class DatabaseManager {
         };
     }
 
-    private mapTaskRecordToTask(record: TaskRecord): AgentTask {
+    private mapTaskRecordToTask(record: any): AgentTask {
+        // PostgreSQL returns snake_case column names
+        // JSONB columns are already parsed by pg driver, but TEXT columns need parsing
+        const parseJsonField = (value: any, defaultValue: any) => {
+            if (value === null || value === undefined) return defaultValue;
+            if (typeof value === 'string') return JSON.parse(value);
+            return value; // Already parsed by pg driver
+        };
+
         return {
             id: record.id,
             title: record.title,
@@ -535,39 +543,47 @@ export class DatabaseManager {
             type: record.type as any,
             priority: record.priority as any,
             status: record.status as any,
-            assignedTo: record.assignedTo || undefined,
-            projectId: record.projectId || undefined,
-            createdAt: record.createdAt,
-            updatedAt: record.updatedAt,
-            startedAt: record.startedAt || undefined,
-            completedAt: record.completedAt || undefined,
-            dueDate: record.dueDate || undefined,
-            dependencies: JSON.parse(record.dependencies || '[]'),
-            blockers: JSON.parse(record.blockers || '[]'),
-            estimatedHours: record.estimatedHours,
-            actualHours: record.actualHours || undefined,
-            tags: JSON.parse(record.tags || '[]'),
-            metadata: JSON.parse(record.metadata || '{}')
+            assignedTo: record.assigned_to || undefined,
+            projectId: record.project_id || undefined,
+            createdAt: record.created_at,
+            updatedAt: record.updated_at,
+            startedAt: record.started_at || undefined,
+            completedAt: record.completed_at || undefined,
+            dueDate: record.due_date || undefined,
+            dependencies: parseJsonField(record.dependencies, []),
+            blockers: parseJsonField(record.blockers, []),
+            estimatedHours: record.estimated_hours,
+            actualHours: record.actual_hours || undefined,
+            tags: parseJsonField(record.tags, []),
+            metadata: parseJsonField(record.metadata, {})
         };
     }
 
-    private mapProjectRecordToProject(record: ProjectRecord): Project {
+    private mapProjectRecordToProject(record: any): Project {
+        // PostgreSQL returns snake_case column names
+        // JSONB columns are already parsed by pg driver, but TEXT columns need parsing
+        const parseJsonField = (value: any, defaultValue: any) => {
+            if (value === null || value === undefined) return defaultValue;
+            if (typeof value === 'string') return JSON.parse(value);
+            return value; // Already parsed by pg driver
+        };
+
         return {
             id: record.id,
             name: record.name,
             description: record.description,
-            templateId: record.templateId || undefined,
+            templateId: record.template_id || undefined,
             status: record.status as any,
-            createdAt: record.createdAt,
-            updatedAt: record.updatedAt,
-            startedAt: record.startedAt || undefined,
-            completedAt: record.completedAt || undefined,
-            dueDate: record.dueDate || undefined,
-            ownerId: record.ownerId,
-            teamMembers: JSON.parse(record.teamMembers || '[]'),
-            tags: JSON.parse(record.tags || '[]'),
-            metadata: JSON.parse(record.metadata || '{}'),
-            configuration: JSON.parse(record.configuration || '{}')
+            createdAt: record.created_at,
+            updatedAt: record.updated_at,
+            startedAt: record.started_at || undefined,
+            completedAt: record.completed_at || undefined,
+            dueDate: record.due_date || undefined,
+            ownerId: record.owner_id,
+            teamMembers: parseJsonField(record.team_members, []),
+            tags: parseJsonField(record.tags, []),
+            metadata: parseJsonField(record.metadata, {}),
+            configuration: parseJsonField(record.configuration, {})
         };
     }
 }

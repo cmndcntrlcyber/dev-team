@@ -1,0 +1,31 @@
+{
+  "name": "@dev-team/mcp-agent",
+  "version": "1.0.0",
+  "description": "MCP integration service for dev-team agents - provides Chrome DevTools and other MCP capabilities",
+  "main": "chrome-devtools-wrapper.js",
+  "type": "module",
+  "scripts": {
+    "test": "node test.js",
+    "dev": "node chrome-devtools-wrapper.js",
+    "check-chrome": "node -e \"import('node-fetch').then(m=>m.default('http://localhost:9222/json/version').then(r=>r.json()).then(console.log))\""
+  },
+  "keywords": [
+    "mcp",
+    "chrome-devtools",
+    "dev-team",
+    "automation",
+    "testing"
+  ],
+  "author": "Dev-Team Platform",
+  "license": "MIT",
+  "dependencies": {
+    "chrome-devtools-mcp": "latest",
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "node-fetch": "^3.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

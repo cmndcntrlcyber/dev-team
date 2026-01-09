@@ -4,6 +4,7 @@ import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import jwt from '@fastify/jwt';
 import { createClient } from 'redis';
+import { Pool } from 'pg';
 import { v4 as uuid } from 'uuid';
 
 interface TaskServiceConfig {
@@ -20,6 +21,7 @@ class TaskService {
   private fastify: any;
   private config: TaskServiceConfig;
   private redis: any;
+  private database: Pool;
 
   constructor() {
     this.fastify = Fastify({
@@ -47,6 +49,11 @@ class TaskService {
       jwtSecret: process.env.JWT_SECRET || 'dev-secret-key',
       logLevel: process.env.LOG_LEVEL || 'info',
     };
+
+    // Initialize database pool
+    this.database = new Pool({
+      connectionString: this.config.databaseUrl,
+    });
   }
 
   async initialize(): Promise<void> {
@@ -58,9 +65,13 @@ class TaskService {
       });
       await this.redis.connect();
 
+      // Test database connection
+      await this.database.query('SELECT 1');
+      this.fastify.log.info('Database connection established');
+
       // Register plugins
       await this.registerPlugins();
-      
+
       // Setup routes
       await this.setupRoutes();
 
@@ -113,20 +124,118 @@ class TaskService {
     });
 
     // Basic task routes
-    this.fastify.get('/tasks', async () => {
-      return {
-        success: true,
-        data: [],
-        message: 'Task service is running',
-      };
+    this.fastify.get('/tasks', async (request: any) => {
+      try {
+        const { projectId, status, priority, assignedTo } = request.query;
+
+        let query = 'SELECT * FROM tasks';
+        const conditions: string[] = [];
+        const values: unknown[] = [];
+        let paramIndex = 1;
+
+        if (projectId) {
+          conditions.push(`project_id = $${paramIndex++}`);
+          values.push(projectId);
+        }
+        if (status) {
+          conditions.push(`status = $${paramIndex++}`);
+          values.push(status);
+        }
+        if (priority) {
+          conditions.push(`priority = $${paramIndex++}`);
+          values.push(priority);
+        }
+        if (assignedTo) {
+          conditions.push(`assigned_to = $${paramIndex++}`);
+          values.push(assignedTo);
+        }
+
+        if (conditions.length > 0) {
+          query += ' WHERE ' + conditions.join(' AND ');
+        }
+
+        query += ' ORDER BY created_at DESC';
+
+        const result = await this.database.query(query, values);
+
+        return {
+          success: true,
+          data: result.rows,
+          meta: { total: result.rows.length },
+        };
+      } catch (error) {
+        this.fastify.log.error('Failed to fetch tasks:', error);
+        return {
+          success: false,
+          error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch tasks' },
+        };
+      }
     });
 
-    this.fastify.post('/tasks', async (request: any) => {
-      return {
-        success: true,
-        data: { id: uuid(), ...request.body },
-        message: 'Task created successfully',
+    this.fastify.post('/tasks', async (request: any, reply: any) => {
+      const body = request.body as {
+        title: string;
+        description?: string;
+        type?: string;
+        priority?: string;
+        projectId?: string;
+        assignedTo?: string;
+        dueDate?: string;
+        tags?: string[];
+        metadata?: Record<string, unknown>;
       };
+
+      // Validate required fields
+      if (!body.title || body.title.trim() === '') {
+        return reply.code(400).send({
+          success: false,
+          error: { code: 'VALIDATION_ERROR', message: 'Task title is required' },
+        });
+      }
+
+      // Validate type if provided
+      const validTypes = ['FOUNDATION', 'AGENT_DEVELOPMENT', 'INTEGRATION', 'UI_DEVELOPMENT', 'TESTING', 'DOCUMENTATION', 'DEPLOYMENT', 'CODE_GENERATION', 'CODE_REVIEW', 'BUG_FIX', 'REFACTORING'];
+      const taskType = body.type || 'CODE_GENERATION';
+      if (!validTypes.includes(taskType)) {
+        return reply.code(400).send({
+          success: false,
+          error: { code: 'VALIDATION_ERROR', message: `Invalid task type. Must be one of: ${validTypes.join(', ')}` },
+        });
+      }
+
+      try {
+        const taskId = uuid();
+
+        const result = await this.database.query(
+          `INSERT INTO tasks (id, title, description, type, priority, status, project_id, assigned_to, due_date, tags, metadata)
+           VALUES ($1, $2, $3, $4, $5, 'NOT_STARTED', $6, $7, $8, $9, $10)
+           RETURNING *`,
+          [
+            taskId,
+            body.title.trim(),
+            body.description || '',
+            taskType,
+            body.priority || 'MEDIUM',
+            body.projectId || null,
+            body.assignedTo || null,
+            body.dueDate ? new Date(body.dueDate) : null,
+            JSON.stringify(body.tags || []),
+            JSON.stringify(body.metadata || {}),
+          ]
+        );
+
+        return reply.code(201).send({
+          success: true,
+          data: result.rows[0],
+          message: 'Task created successfully',
+        });
+      } catch (error) {
+        this.fastify.log.error('Failed to create task:', error);
+        return reply.code(500).send({
+          success: false,
+          error: { code: 'INTERNAL_ERROR', message: 'Failed to create task' },
+        });
+      }
     });
   }
 
@@ -149,7 +258,11 @@ class TaskService {
       if (this.redis) {
         await this.redis.disconnect();
       }
-      
+
+      if (this.database) {
+        await this.database.end();
+      }
+
       await this.fastify.close();
       this.fastify.log.info('Task Service stopped gracefully');
     } catch (error) {

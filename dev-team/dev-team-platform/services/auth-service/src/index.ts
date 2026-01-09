@@ -49,10 +49,12 @@ class AuthenticationService {
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 2000,
     });
+  }
 
-    this.initializeServices();
-    this.registerPlugins();
-    this.registerRoutes();
+  async initialize(): Promise<void> {
+    await this.initializeServices();
+    await this.registerPlugins();
+    await this.registerRoutes();
   }
 
   private async initializeServices(): Promise<void> {
@@ -65,7 +67,7 @@ class AuthenticationService {
       await this.redis.connect();
 
       // Initialize core services
-      this.authService = new AuthService(this.database, this.redis, this.fastify.log);
+      this.authService = new AuthService(this.database, this.redis, this.fastify.log, this.fastify);
       this.userService = new UserService(this.database, this.fastify.log);
       this.emailService = new EmailService(this.fastify.log);
 
@@ -248,7 +250,12 @@ process.on('SIGINT', async () => {
 });
 
 if (require.main === module) {
-  service.start();
+  service.initialize().then(() => {
+    return service.start();
+  }).catch((error) => {
+    console.error('Failed to start Auth Service:', error);
+    process.exit(1);
+  });
 }
 
 export { AuthenticationService };

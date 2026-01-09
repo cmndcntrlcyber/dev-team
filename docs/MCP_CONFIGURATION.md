@@ -159,16 +159,95 @@ await use_mcp_tool({
 });
 ```
 
+### 4. Chrome DevTools MCP Server
+- **Server Name:** `chrome-devtools`
+- **Purpose:** Browser automation, debugging, and UI/UX testing
+- **Type:** stdio (npx package)
+- **Command:** `npx -y chrome-devtools-mcp --browser-url=http://localhost:9222`
+- **Authentication:** None (local Chrome connection)
+
+**Prerequisites:**
+- Chrome/Chromium installed
+- Chrome running with remote debugging on port 9222
+- Use `/home/cmndcntrl/code/dev-team/scripts/chrome-launcher.sh start`
+
+**Key Capabilities:**
+
+**Navigation & Control (6 tools):**
+- Navigate pages, open/close tabs, switch between pages
+- Wait for content, list all open pages
+
+**Inspection (6 tools):**
+- Take DOM snapshots with accessibility info
+- Capture screenshots (full page or element-specific)
+- List console messages (filter by type: log, error, warning)
+- Monitor network requests and responses
+
+**Interaction (8 tools):**
+- Click, hover, drag elements
+- Fill forms, upload files
+- Press keyboard keys
+- Handle dialogs (alert, confirm, prompt)
+
+**Performance Analysis (3 tools):**
+- Start/stop performance traces
+- Analyze Core Web Vitals (LCP, FCP, TTI, TBT, CLS)
+- Generate performance insights
+
+**Device Emulation (2 tools):**
+- Resize viewport for responsive testing
+- Emulate devices, network conditions, geolocation
+
+### Example Usage
+
+```javascript
+// Start Chrome first
+// /home/cmndcntrl/code/dev-team/scripts/chrome-launcher.sh start
+
+// Debug console errors
+await use_mcp_tool({
+  server_name: "chrome-devtools",
+  tool_name: "cgIazK0mcp0navigate_page",
+  arguments: { url: "http://localhost:3000" }
+});
+
+await use_mcp_tool({
+  server_name: "chrome-devtools",
+  tool_name: "cgIazK0mcp0list_console_messages",
+  arguments: { types: ["error"] }
+});
+
+// Performance analysis
+await use_mcp_tool({
+  server_name: "chrome-devtools",
+  tool_name: "cgIazK0mcp0performance_start_trace",
+  arguments: { reload: true, autoStop: false }
+});
+
+await use_mcp_tool({
+  server_name: "chrome-devtools",
+  tool_name: "cgIazK0mcp0performance_stop_trace",
+  arguments: {}
+});
+
+// Take screenshot
+await use_mcp_tool({
+  server_name: "chrome-devtools",
+  tool_name: "cgIazK0mcp0take_screenshot",
+  arguments: { fullPage: true, format: "png" }
+});
+```
+
 ## 🤖 Agent Integration Matrix
 
 | Agent | Primary MCP Servers | Use Cases |
 |-------|-------------------|-----------|
 | **All Agents** | Tavily | Web research, documentation lookup, latest information |
 | **Architecture Lead** | Cloudflare, Tavily | Infrastructure design, Workers/KV/R2/D1 setup, best practices |
-| **DevOps Engineer** | Cloudflare, ProxmoxMCP | Deployments, DNS management, VM operations, CI/CD |
+| **DevOps Engineer** | Cloudflare, ProxmoxMCP, Chrome DevTools | Deployments, DNS, VM ops, production health checks |
 | **Backend Integration** | Cloudflare, ProxmoxMCP | Workers APIs, D1 databases, KV storage, VM commands |
-| **Frontend Core** | Cloudflare | Pages deployment, asset management, edge functions |
-| **QA Agent** | Tavily, Cloudflare | Research testing strategies, deployment verification |
+| **Frontend Core** | Cloudflare, Chrome DevTools | Pages deployment, UI debugging, responsive testing |
+| **QA Agent** | Tavily, Cloudflare, Chrome DevTools | E2E testing, visual regression, accessibility checks |
 | **MCP Integration** | All servers | Cross-platform orchestration, unified infrastructure control |
 
 ## 🔐 Authentication Configuration

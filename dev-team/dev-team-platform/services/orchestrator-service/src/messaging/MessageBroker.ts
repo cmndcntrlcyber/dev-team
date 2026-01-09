@@ -372,11 +372,12 @@ export class MessageBroker extends EventEmitter {
                         this.emit('connection:restored');
                         break;
 
-                    case 'error':
+                    case 'error': {
                         const errorMessage = typeof status.data === 'string' ? status.data : 'Unknown error';
                         this.logger.error('NATS connection error', new Error(errorMessage));
                         this.emit('connection:error', { error: status.data });
                         break;
+                    }
 
                     case 'ldm':
                         this.logger.warn('NATS entered lame duck mode');

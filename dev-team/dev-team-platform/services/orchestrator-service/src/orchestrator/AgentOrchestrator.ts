@@ -1,19 +1,25 @@
 import { EventEmitter } from 'events';
-import { 
-    AgentId, 
-    AgentType, 
-    AgentTask, 
-    TaskResult, 
-    AgentMessage, 
-    PlatformConfig, 
-    Logger, 
+import { v4 as uuidv4 } from 'uuid';
+import {
+    AgentId,
+    AgentType,
+    AgentTask,
+    TaskResult,
+    AgentMessage,
+    PlatformConfig,
+    Logger,
     BaseAgent,
     AgentStatus,
     HealthStatus,
     AgentMetrics,
     MessageType,
     TaskStatus,
-    PlatformError
+    PlatformError,
+    TaskBlueprint,
+    TaskBlueprintSubtask,
+    ArchitectureAgentOutput,
+    TaskPriority,
+    TaskType
 } from '../shared';
 import { DatabaseManager } from '../database/DatabaseManager';
 import { MessageBroker } from '../messaging/MessageBroker';
@@ -72,6 +78,9 @@ export class AgentOrchestrator extends EventEmitter {
         try {
             this.logger.info('Initializing Agent Orchestrator...');
 
+            // Load agents from database
+            await this.loadAgentsFromDB();
+
             // Subscribe to agent registration messages
             await this.messageBroker.subscribe('agent.register', this.handleAgentRegistration.bind(this));
             await this.messageBroker.subscribe('agent.heartbeat', this.handleAgentHeartbeat.bind(this));
@@ -82,6 +91,184 @@ export class AgentOrchestrator extends EventEmitter {
         } catch (error) {
             this.logger.error('Failed to initialize Agent Orchestrator', error as Error);
             throw new PlatformError('Orchestrator initialization failed', 'INIT_ERROR', 500, { error });
+        }
+    }
+
+    /**
+     * Load enabled agents from database on startup
+     * Creates proxy agent objects for database-configured agents
+     */
+    async loadAgentsFromDB(): Promise<void> {
+        try {
+            this.logger.info('Loading agents from database...');
+
+            const result = await this.database.query(
+                `SELECT * FROM agents WHERE enabled = true ORDER BY priority DESC`
+            );
+
+            for (const row of result.rows) {
+                // Create a proxy agent representation for database-configured agents
+                // Real agents will register via NATS and update their status
+                const proxyAgent: BaseAgent = {
+                    id: row.id,
+                    type: row.type,
+                    name: row.name || row.id,
+                    status: row.status || 'OFFLINE',
+                    capabilities: row.capabilities || {},
+                    getConfiguration: () => row.configuration || {},
+                    canHandleTask: (task: AgentTask) => {
+                        // Check if agent type matches task requirements
+                        const caps = row.capabilities || {};
+                        return caps.taskTypes?.includes(task.type) || false;
+                    },
+                    executeTask: async () => {
+                        throw new PlatformError('Agent not connected', 'AGENT_OFFLINE', 503);
+                    },
+                    getTaskProgress: () => null,
+                    sendMessage: async () => { /* Proxy agent - no-op */ },
+                    receiveMessage: async () => ({
+                        messageId: '',
+                        success: false,
+                        error: 'Agent not connected',
+                        timestamp: new Date(),
+                        processingTime: 0
+                    }),
+                    subscribeToTopic: () => { /* Proxy agent - no-op */ },
+                    initialize: async () => { /* Proxy agent - no-op */ },
+                    start: async () => { /* Proxy agent - no-op */ },
+                    stop: async () => { /* Proxy agent - no-op */ },
+                    restart: async () => { /* Proxy agent - no-op */ },
+                    getMetrics: () => ({
+                        productivity: {
+                            tasksCompleted: row.metrics?.tasks_completed || 0,
+                            tasksInProgress: row.metrics?.tasks_in_progress || 0,
+                            averageCompletionTime: row.metrics?.avg_completion_time || 0,
+                            velocityTrend: [],
+                            estimationAccuracy: row.metrics?.estimation_accuracy || 0,
+                            throughput: row.metrics?.throughput || 0
+                        },
+                        quality: {
+                            codeQualityScore: 0,
+                            testCoverageAchieved: 0,
+                            defectRate: 0,
+                            reworkPercentage: 0,
+                            reviewScore: 0,
+                            complianceScore: 0
+                        },
+                        reliability: {
+                            uptime: row.metrics?.uptime || 0,
+                            errorRate: row.metrics?.error_rate || 0,
+                            responseTime: row.metrics?.response_time || 0,
+                            successRate: row.metrics?.success_rate || 0,
+                            mtbf: 0,
+                            mttr: 0
+                        },
+                        coordination: {
+                            communicationEfficiency: 0,
+                            conflictResolutionTime: 0,
+                            dependencyResolutionRate: 0,
+                            collaborationScore: 0,
+                            knowledgeSharingRate: 0
+                        },
+                        performance: {
+                            averageResponseTime: row.metrics?.response_time || 0,
+                            peakResponseTime: 0,
+                            requestsPerSecond: 0,
+                            concurrentTasks: row.metrics?.tasks_in_progress || 0,
+                            resourceUtilization: 0
+                        }
+                    }),
+                    getHealthStatus: () => ({
+                        status: row.status === 'READY' ? 'HEALTHY' : 'DEGRADED',
+                        lastCheck: new Date(),
+                        uptime: 0,
+                        issues: row.status !== 'READY' ? [{
+                            severity: 'LOW',
+                            message: `Agent status: ${row.status}`,
+                            code: 'AGENT_STATUS',
+                            timestamp: new Date()
+                        }] : [],
+                        systemInfo: { memoryUsage: 0, cpuUsage: 0, activeConnections: 0 }
+                    })
+                };
+
+                // Store in memory registry
+                this.agents.set(row.id, {
+                    agent: proxyAgent,
+                    lastSeen: row.last_heartbeat || row.updated_at || new Date()
+                });
+
+                this.logger.debug(`Loaded agent from database: ${row.id} (${row.type})`);
+            }
+
+            this.logger.info(`Loaded ${result.rows.length} agents from database`);
+        } catch (error) {
+            this.logger.error('Failed to load agents from database', error as Error);
+            // Non-fatal - orchestrator can still work with dynamically registered agents
+        }
+    }
+
+    /**
+     * Persist agent configuration to database
+     */
+    async persistAgent(agent: BaseAgent): Promise<void> {
+        try {
+            const config = agent.getConfiguration ? agent.getConfiguration() : {};
+
+            await this.database.query(
+                `INSERT INTO agents (id, type, name, status, capabilities, configuration, updated_at)
+                 VALUES ($1, $2, $3, $4, $5, $6, NOW())
+                 ON CONFLICT (id) DO UPDATE SET
+                    type = $2,
+                    name = $3,
+                    status = $4,
+                    capabilities = $5,
+                    configuration = $6,
+                    updated_at = NOW()`,
+                [
+                    agent.id,
+                    agent.type,
+                    agent.name || agent.id,
+                    agent.status,
+                    JSON.stringify(agent.capabilities || {}),
+                    JSON.stringify(config)
+                ]
+            );
+
+            this.logger.debug(`Agent persisted to database: ${agent.id}`);
+        } catch (error) {
+            this.logger.error(`Failed to persist agent ${agent.id}`, error as Error);
+            throw error;
+        }
+    }
+
+    /**
+     * Reconcile agent status between database and in-memory registry
+     * Called on heartbeat to ensure consistency
+     */
+    async reconcileAgentStatus(agentId: AgentId, status: AgentStatus, metrics?: any): Promise<void> {
+        try {
+            // Update database status
+            await this.database.query(
+                `UPDATE agents SET
+                    status = $2,
+                    last_heartbeat = NOW(),
+                    metrics = COALESCE($3, metrics),
+                    updated_at = NOW()
+                 WHERE id = $1`,
+                [agentId, status, metrics ? JSON.stringify(metrics) : null]
+            );
+
+            // Update in-memory registry
+            const registration = this.agents.get(agentId);
+            if (registration) {
+                registration.agent.status = status;
+                registration.lastSeen = new Date();
+            }
+
+            this.logger.debug(`Agent status reconciled: ${agentId} -> ${status}`);
+        } catch (error) {
+            this.logger.error(`Failed to reconcile agent status ${agentId}`, error as Error);
         }
     }
 
@@ -159,6 +346,20 @@ export class AgentOrchestrator extends EventEmitter {
 
             this.agents.set(agent.id, registration);
 
+            // Persist agent to database
+            await this.persistAgent(agent);
+
+            // Log the registration action
+            try {
+                await this.database.query(
+                    `SELECT log_agent_action($1, 'REGISTERED', $2, $3)`,
+                    [agent.id, null, JSON.stringify({ type: agent.type })]
+                );
+            } catch (logErr) {
+                // Non-fatal - log function may not exist yet
+                this.logger.debug('Agent audit log not available');
+            }
+
             // Set up heartbeat monitoring
             registration.heartbeatInterval = setInterval(() => {
                 this.checkAgentHeartbeat(agent.id);
@@ -177,9 +378,9 @@ export class AgentOrchestrator extends EventEmitter {
         } catch (error) {
             this.logger.error(`Failed to register agent ${agent.id}`, error as Error);
             throw new PlatformError(
-                `Agent registration failed: ${agent.id}`, 
-                'AGENT_REGISTRATION_ERROR', 
-                500, 
+                `Agent registration failed: ${agent.id}`,
+                'AGENT_REGISTRATION_ERROR',
+                500,
                 { agentId: agent.id, error }
             );
         }
@@ -206,6 +407,22 @@ export class AgentOrchestrator extends EventEmitter {
             // Remove from registry
             this.agents.delete(agentId);
 
+            // Update database status to OFFLINE
+            await this.database.query(
+                `UPDATE agents SET status = 'OFFLINE', updated_at = NOW() WHERE id = $1`,
+                [agentId]
+            );
+
+            // Log the unregistration
+            try {
+                await this.database.query(
+                    `SELECT log_agent_action($1, 'UNREGISTERED', $2, $3)`,
+                    [agentId, null, '{}']
+                );
+            } catch (logErr) {
+                this.logger.debug('Agent audit log not available');
+            }
+
             // Reassign any tasks that were assigned to this agent
             await this.reassignAgentTasks(agentId);
 
@@ -220,9 +437,9 @@ export class AgentOrchestrator extends EventEmitter {
         } catch (error) {
             this.logger.error(`Failed to unregister agent ${agentId}`, error as Error);
             throw new PlatformError(
-                `Agent unregistration failed: ${agentId}`, 
-                'AGENT_UNREGISTRATION_ERROR', 
-                500, 
+                `Agent unregistration failed: ${agentId}`,
+                'AGENT_UNREGISTRATION_ERROR',
+                500,
                 { agentId, error }
             );
         }
@@ -480,12 +697,22 @@ export class AgentOrchestrator extends EventEmitter {
 
     private async handleAgentHeartbeat(message: any): Promise<void> {
         try {
-            const { agentId, status, timestamp } = message;
+            const { agentId, status, timestamp, metrics } = message;
             const registration = this.agents.get(agentId);
-            
+
             if (registration) {
                 registration.lastSeen = new Date(timestamp);
                 this.logger.debug(`Heartbeat received from agent: ${agentId}`);
+
+                // Reconcile status with database
+                await this.reconcileAgentStatus(agentId, status, metrics);
+            } else {
+                // Agent not in memory - may be a new agent registering
+                // Update database status anyway
+                await this.database.query(
+                    `UPDATE agents SET status = $2, last_heartbeat = NOW(), updated_at = NOW() WHERE id = $1`,
+                    [agentId, status]
+                );
             }
         } catch (error) {
             this.logger.error('Error handling agent heartbeat', error as Error);
@@ -513,15 +740,19 @@ export class AgentOrchestrator extends EventEmitter {
         try {
             const { taskId, result } = message;
             const task = this.tasks.get(taskId);
-            
+
             if (task) {
                 task.status = result.status === 'SUCCESS' ? 'COMPLETED' : 'CANCELLED';
                 task.completedAt = new Date();
                 task.actualHours = result.duration / (1000 * 60 * 60); // Convert ms to hours
-                
+
                 await this.database.updateTask(task);
+
+                // Check if result contains a TaskBlueprint (from Architecture Agent)
+                await this.processArchitectureOutput(task, result);
+
                 this.emit('task:completed', { taskId, result });
-                
+
                 // Free up the agent for new tasks
                 if (task.assignedTo) {
                     const agent = this.getAgent(task.assignedTo);
@@ -536,7 +767,226 @@ export class AgentOrchestrator extends EventEmitter {
         }
     }
 
+    // ============================================
+    // Architecture Agent Integration
+    // ============================================
+
+    /**
+     * Process output from Architecture Agent
+     * Handles task decomposition (TaskBlueprint) and other structured outputs
+     */
+    private async processArchitectureOutput(task: AgentTask, result: TaskResult): Promise<void> {
+        try {
+            const output = result.output as ArchitectureAgentOutput | null;
+
+            if (!output || typeof output !== 'object') {
+                return;
+            }
+
+            // Check if it's a TaskBlueprint for task decomposition
+            if (output.type === 'BLUEPRINT') {
+                await this.handleTaskBlueprint(task, output.data as TaskBlueprint);
+            }
+        } catch (error) {
+            this.logger.error(`Error processing architecture output for task ${task.id}`, error as Error);
+        }
+    }
+
+    /**
+     * Handle a TaskBlueprint from Architecture Agent
+     * Creates subtasks and sets up dependencies
+     */
+    private async handleTaskBlueprint(parentTask: AgentTask, blueprint: TaskBlueprint): Promise<void> {
+        this.logger.info(`Processing task blueprint for: ${parentTask.id}`);
+
+        const subtaskIds: Map<string, string> = new Map(); // Map subtask title to ID
+        const createdTasks: AgentTask[] = [];
+
+        // First pass: Create all subtasks with IDs
+        for (const subtask of blueprint.subtasks) {
+            const taskId = `subtask_${uuidv4().slice(0, 8)}`;
+            subtaskIds.set(subtask.title, taskId);
+
+            const newTask: AgentTask = {
+                id: taskId,
+                title: subtask.title,
+                description: subtask.description,
+                type: subtask.type as TaskType,
+                priority: subtask.priority as TaskPriority,
+                status: 'NOT_STARTED' as TaskStatus,
+                projectId: parentTask.projectId,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                estimatedHours: subtask.estimatedHours,
+                dependencies: [], // Will be filled in second pass
+                blockers: [],
+                tags: [...(parentTask.tags || []), 'subtask', `parent:${parentTask.id}`],
+                metadata: {
+                    parentTaskId: parentTask.id,
+                    assignedAgentType: subtask.assignedAgentType,
+                    acceptanceCriteria: subtask.acceptanceCriteria,
+                    technicalNotes: subtask.technicalNotes,
+                    blueprintId: blueprint.id,
+                    ...subtask.metadata,
+                },
+            };
+
+            createdTasks.push(newTask);
+        }
+
+        // Second pass: Resolve dependencies (title references to task IDs)
+        for (let i = 0; i < createdTasks.length; i++) {
+            const subtaskDef = blueprint.subtasks[i];
+            const task = createdTasks[i];
+
+            task.dependencies = subtaskDef.dependencies
+                .map(depTitle => subtaskIds.get(depTitle))
+                .filter((id): id is string => id !== undefined);
+        }
+
+        // Store all subtasks in database and submit them
+        for (const task of createdTasks) {
+            await this.database.createTask(task);
+            this.tasks.set(task.id, task);
+
+            this.logger.info(`Created subtask: ${task.id} (${task.title}) for agent type: ${task.metadata.assignedAgentType}`);
+        }
+
+        // Submit tasks that have no dependencies (ready to start)
+        const readyTasks = createdTasks.filter(t => t.dependencies.length === 0);
+        for (const task of readyTasks) {
+            await this.submitTaskToQueue(task);
+        }
+
+        // Update parent task to track subtasks
+        parentTask.metadata = {
+            ...parentTask.metadata,
+            subtaskIds: createdTasks.map(t => t.id),
+            blueprintId: blueprint.id,
+            sequencingStrategy: blueprint.sequencingStrategy,
+            criticalPath: blueprint.criticalPath,
+        };
+        await this.database.updateTask(parentTask);
+
+        this.emit('task:decomposed', {
+            parentTaskId: parentTask.id,
+            subtaskCount: createdTasks.length,
+            readyTaskCount: readyTasks.length,
+            blueprintId: blueprint.id,
+        });
+
+        this.logger.info(`Task blueprint processed: ${createdTasks.length} subtasks created, ${readyTasks.length} ready to start`);
+    }
+
+    /**
+     * Submit a task to the queue (internal helper for subtasks)
+     */
+    private async submitTaskToQueue(task: AgentTask): Promise<void> {
+        const assigned = await this.assignTask(task);
+        if (!assigned) {
+            this.taskQueue.push(task);
+            this.logger.info(`Subtask queued for later assignment: ${task.id}`);
+        }
+    }
+
+    /**
+     * Check if a task should be routed to Architecture Agent for review
+     * Called before assigning tasks that may need architectural oversight
+     */
+    private async preTaskHook(task: AgentTask): Promise<boolean> {
+        // Tasks that might need architecture review
+        const reviewableTypes: TaskType[] = ['FOUNDATION', 'REFACTORING', 'INTEGRATION'];
+
+        if (!reviewableTypes.includes(task.type as TaskType)) {
+            return true; // No review needed
+        }
+
+        // Check if task already has architecture approval
+        if (task.metadata?.architectureApproved) {
+            return true;
+        }
+
+        // Check if this is a subtask from Architecture Agent (already approved)
+        if (task.metadata?.parentTaskId && task.metadata?.assignedAgentType) {
+            return true;
+        }
+
+        // For large tasks, request architecture review
+        if (task.estimatedHours > 8 && !task.metadata?.skipArchitectureReview) {
+            this.logger.info(`Task ${task.id} requires architecture review`);
+
+            // Create an architecture review task
+            const reviewTask: AgentTask = {
+                id: `review_${task.id}`,
+                title: `Architecture Review: ${task.title}`,
+                description: `Review the architectural approach for: ${task.description}`,
+                type: 'CODE_REVIEW' as TaskType,
+                priority: task.priority,
+                status: 'NOT_STARTED' as TaskStatus,
+                projectId: task.projectId,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                estimatedHours: 1,
+                dependencies: [],
+                blockers: [],
+                tags: ['architecture-review', `original:${task.id}`],
+                metadata: {
+                    originalTaskId: task.id,
+                    reviewType: 'PRE_IMPLEMENTATION',
+                },
+            };
+
+            // Submit review task to Architecture Agent
+            await this.submitTask(reviewTask);
+
+            // Block original task until review is complete
+            task.blockers = [...(task.blockers || []), reviewTask.id];
+            task.status = 'BLOCKED' as TaskStatus;
+            await this.database.updateTask(task);
+
+            return false; // Don't proceed with assignment yet
+        }
+
+        return true;
+    }
+
+    /**
+     * Check and unblock tasks whose dependencies are complete
+     */
+    private async checkDependenciesAndUnblock(): Promise<void> {
+        for (const [taskId, task] of this.tasks) {
+            if (task.status !== 'NOT_STARTED' && task.status !== 'BLOCKED') {
+                continue;
+            }
+
+            // Check if all dependencies are complete
+            const allDepsComplete = task.dependencies.every(depId => {
+                const depTask = this.tasks.get(depId);
+                return depTask?.status === 'COMPLETED';
+            });
+
+            // Check if all blockers are resolved
+            const allBlockersResolved = (task.blockers || []).every(blockerId => {
+                const blockerTask = this.tasks.get(blockerId);
+                return blockerTask?.status === 'COMPLETED';
+            });
+
+            if (allDepsComplete && allBlockersResolved && task.status === 'BLOCKED') {
+                task.status = 'NOT_STARTED' as TaskStatus;
+                task.updatedAt = new Date();
+                await this.database.updateTask(task);
+
+                // Submit to queue
+                this.taskQueue.push(task);
+                this.logger.info(`Task ${taskId} unblocked and queued for assignment`);
+            }
+        }
+    }
+
     private async processTasks(): Promise<void> {
+        // First, check if any blocked tasks can be unblocked
+        await this.checkDependenciesAndUnblock();
+
         if (this.taskQueue.length === 0) {
             return;
         }
@@ -545,6 +995,14 @@ export class AgentOrchestrator extends EventEmitter {
         this.taskQueue.length = 0;
 
         for (const task of tasksToAssign) {
+            // Run pre-task hook (architecture review check)
+            const canProceed = await this.preTaskHook(task);
+
+            if (!canProceed) {
+                // Task was blocked for review, don't add back to queue
+                continue;
+            }
+
             const assigned = await this.assignTask(task);
             if (!assigned) {
                 // Put back in queue

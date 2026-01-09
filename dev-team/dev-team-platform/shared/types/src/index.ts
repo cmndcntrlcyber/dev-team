@@ -42,8 +42,9 @@ export interface AgentConfig {
 export interface BaseAgent {
   readonly id: AgentId;
   readonly type: AgentType;
+  name?: string;
   readonly capabilities: AgentCapabilities;
-  readonly status: AgentStatus;
+  status: AgentStatus;
   
   // Core lifecycle methods
   initialize(config: AgentConfig): Promise<void>;
@@ -370,6 +371,168 @@ export interface Milestone {
   criteria: string[];
 }
 
+// Workflow Types
+export type WorkflowStatus = 'DRAFT' | 'ACTIVE' | 'DEPRECATED' | 'ARCHIVED';
+
+export type WorkflowExecutionStatus =
+  | 'PENDING'
+  | 'RUNNING'
+  | 'PAUSED'
+  | 'WAITING_APPROVAL'
+  | 'COMPLETED'
+  | 'FAILED'
+  | 'CANCELLED';
+
+export type WorkflowStepType =
+  | 'TASK'
+  | 'PARALLEL'
+  | 'CONDITIONAL'
+  | 'WAIT'
+  | 'APPROVAL'
+  | 'WEBHOOK'
+  | 'SCRIPT';
+
+export type WorkflowStepExecutionStatus =
+  | 'PENDING'
+  | 'RUNNING'
+  | 'WAITING'
+  | 'COMPLETED'
+  | 'FAILED'
+  | 'SKIPPED'
+  | 'CANCELLED';
+
+export type WorkflowTriggerType = 'MANUAL' | 'SCHEDULED' | 'EVENT' | 'API' | 'WEBHOOK';
+
+export interface WorkflowConfig {
+  maxParallelSteps?: number;
+  defaultTimeoutMs?: number;
+  failureStrategy?: 'FAIL_FAST' | 'CONTINUE' | 'ROLLBACK';
+  retryPolicy?: WorkflowRetryPolicy;
+}
+
+export interface WorkflowRetryPolicy {
+  maxRetries: number;
+  retryDelayMs: number;
+  backoffMultiplier: number;
+}
+
+export interface WorkflowTrigger {
+  type: WorkflowTriggerType;
+  config: Record<string, any>;
+}
+
+export interface WorkflowHooks {
+  onStart?: string;
+  onComplete?: string;
+  onFailed?: string;
+  onStepComplete?: string;
+}
+
+export interface Workflow {
+  id: string;
+  name: string;
+  description?: string;
+  version: number;
+  status: WorkflowStatus;
+  config: WorkflowConfig;
+  variables: Record<string, any>;
+  triggers: WorkflowTrigger[];
+  hooks: WorkflowHooks;
+  ownerId?: string;
+  projectId?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface WorkflowStepCondition {
+  expression: string;
+  variables?: string[];
+}
+
+export interface WorkflowStepTaskConfig {
+  type: TaskType;
+  title: string;
+  description?: string;
+  priority?: TaskPriority;
+  metadata?: Record<string, any>;
+}
+
+export interface WorkflowStep {
+  id: string;
+  workflowId: string;
+  name: string;
+  description?: string;
+  stepOrder: number;
+  stepType: WorkflowStepType;
+  agentType?: AgentType;
+  taskConfig: WorkflowStepTaskConfig;
+  retryPolicy: WorkflowRetryPolicy;
+  timeoutMs: number;
+  condition?: WorkflowStepCondition;
+  onSuccess?: string;
+  onFailure?: string;
+  enabled: boolean;
+  dependencies: string[];
+}
+
+export interface WorkflowExecution {
+  id: string;
+  workflowId: string;
+  status: WorkflowExecutionStatus;
+  triggerType: WorkflowTriggerType;
+  triggeredBy?: string;
+  inputVariables: Record<string, any>;
+  outputVariables: Record<string, any>;
+  context: Record<string, any>;
+  progress: number;
+  currentStepId?: string;
+  errorMessage?: string;
+  startedAt?: Date;
+  completedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface WorkflowStepExecution {
+  id: string;
+  executionId: string;
+  stepId: string;
+  status: WorkflowStepExecutionStatus;
+  assignedAgentId?: AgentId;
+  taskId?: string;
+  inputData: Record<string, any>;
+  outputData: Record<string, any>;
+  errorMessage?: string;
+  retryCount: number;
+  startedAt?: Date;
+  completedAt?: Date;
+}
+
+export interface WorkflowTemplate {
+  id: string;
+  name: string;
+  description?: string;
+  category: 'CI_CD' | 'TESTING' | 'DEVELOPMENT' | 'DEPLOYMENT' | 'MAINTENANCE' | 'CUSTOM';
+  workflowDefinition: Record<string, any>;
+  variablesSchema: Record<string, any>;
+  icon?: string;
+  isSystem: boolean;
+  usageCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface WorkflowApproval {
+  id: string;
+  stepExecutionId: string;
+  approverId?: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'EXPIRED';
+  comments?: string;
+  approvedAt?: Date;
+  expiresAt?: Date;
+  createdAt: Date;
+}
+
 // User and Authentication Types
 export interface User {
   id: string;
@@ -466,6 +629,7 @@ export interface ResponseMetadata {
   requestId: string;
   version: string;
   pagination?: PaginationInfo;
+  total?: number;
 }
 
 export interface PaginationInfo {
@@ -605,6 +769,162 @@ export interface EventEmitter {
   emit(event: string, ...args: any[]): void;
   once(event: string, listener: (...args: any[]) => void): void;
 }
+
+// ============================================
+// Architecture Agent Output Types
+// ============================================
+
+/**
+ * Architecture Decision Record (ADR)
+ * Used by the Architecture Agent to document technology and design decisions
+ */
+export type ArchitectureDecisionStatus = 'PROPOSED' | 'ACCEPTED' | 'DEPRECATED' | 'SUPERSEDED';
+
+export interface ArchitectureDecisionAlternative {
+  option: string;
+  pros: string[];
+  cons: string[];
+  rejected: boolean;
+  reason?: string;
+}
+
+export interface ArchitectureDecision {
+  id: string;
+  title: string;
+  status: ArchitectureDecisionStatus;
+  context: string;
+  decision: string;
+  consequences: string[];
+  alternatives: ArchitectureDecisionAlternative[];
+  affectedAgents: AgentType[];
+  affectedAreas: string[];
+  createdAt: Date;
+  updatedAt?: Date;
+  supersededBy?: string;
+  projectId?: string;
+  createdBy?: AgentId;
+}
+
+/**
+ * Task Blueprint - Output from Architecture Agent when decomposing tasks
+ * Used by the Orchestrator to create and schedule subtasks
+ */
+export interface TaskBlueprintSubtask {
+  title: string;
+  description: string;
+  type: TaskType;
+  assignedAgentType: AgentType;
+  priority: TaskPriority;
+  estimatedHours: number;
+  dependencies: string[]; // References to other subtask titles
+  acceptanceCriteria: string[];
+  technicalNotes?: string;
+  metadata?: Record<string, any>;
+}
+
+export interface TaskBlueprint {
+  id: string;
+  parentTaskId: string;
+  projectId?: string;
+  subtasks: TaskBlueprintSubtask[];
+  sequencingStrategy: 'PARALLEL' | 'SEQUENTIAL' | 'DEPENDENCY_GRAPH';
+  criticalPath: string[]; // Subtask titles in order
+  estimatedTotalHours: number;
+  notes?: string;
+  createdAt: Date;
+  createdBy?: AgentId;
+}
+
+/**
+ * Code Standard - Coding guidelines defined by Architecture Agent
+ * Other agents use these to ensure consistent code quality
+ */
+export type CodeStandardCategory = 'NAMING' | 'STRUCTURE' | 'PATTERN' | 'TESTING' | 'DOCUMENTATION' | 'SECURITY';
+export type CodeStandardSeverity = 'ERROR' | 'WARNING' | 'INFO';
+
+export interface CodeStandardRule {
+  name: string;
+  description: string;
+  examples: {
+    good: string;
+    bad: string;
+  }[];
+  severity: CodeStandardSeverity;
+  autoFixable?: boolean;
+}
+
+export interface CodeStandard {
+  id: string;
+  category: CodeStandardCategory;
+  language: string;
+  framework?: string;
+  rules: CodeStandardRule[];
+  appliesTo: string[]; // File patterns
+  projectId?: string;
+  createdAt: Date;
+  updatedAt?: Date;
+  createdBy?: AgentId;
+}
+
+/**
+ * Architecture Review - Code review from architectural perspective
+ * Used when reviewing work from other agents
+ */
+export type ArchitectureReviewVerdict = 'APPROVED' | 'CHANGES_REQUESTED' | 'REJECTED';
+export type ArchitectureReviewFindingType = 'ISSUE' | 'SUGGESTION' | 'PRAISE';
+export type ArchitectureReviewFindingSeverity = 'CRITICAL' | 'MAJOR' | 'MINOR' | 'INFO';
+
+export interface ArchitectureReviewFinding {
+  type: ArchitectureReviewFindingType;
+  severity: ArchitectureReviewFindingSeverity;
+  location?: string; // File path and line number
+  description: string;
+  recommendation?: string;
+  relatedDecision?: string; // Reference to an ArchitectureDecision ID
+}
+
+export interface ArchitectureReview {
+  id: string;
+  taskId: string;
+  reviewerId: AgentId;
+  verdict: ArchitectureReviewVerdict;
+  findings: ArchitectureReviewFinding[];
+  architecturalConcerns: string[];
+  approvalConditions?: string[];
+  summary: string;
+  createdAt: Date;
+  projectId?: string;
+}
+
+/**
+ * Technology Evaluation - Used when Architecture Agent evaluates tech choices
+ */
+export interface TechnologyEvaluation {
+  id: string;
+  name: string;
+  category: string; // e.g., 'database', 'framework', 'library'
+  version?: string;
+  score: number; // 0-100
+  pros: string[];
+  cons: string[];
+  useCases: string[];
+  alternatives: string[];
+  recommendation: 'STRONGLY_RECOMMENDED' | 'RECOMMENDED' | 'NEUTRAL' | 'NOT_RECOMMENDED' | 'STRONGLY_NOT_RECOMMENDED';
+  notes?: string;
+  evaluatedAt: Date;
+  evaluatedBy?: AgentId;
+}
+
+/**
+ * Architecture Agent output union type
+ * All structured outputs from the Architecture Agent
+ */
+export type ArchitectureAgentOutput =
+  | { type: 'DECISION'; data: ArchitectureDecision }
+  | { type: 'BLUEPRINT'; data: TaskBlueprint }
+  | { type: 'STANDARD'; data: CodeStandard }
+  | { type: 'REVIEW'; data: ArchitectureReview }
+  | { type: 'EVALUATION'; data: TechnologyEvaluation };
 
 // Export all types as a namespace for easier imports
 export * as Types from './index';

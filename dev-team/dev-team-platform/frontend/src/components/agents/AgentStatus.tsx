@@ -1,11 +1,22 @@
+'use client';
+
 import React, { useState } from 'react';
+import type { Agent } from '@/types';
 
 interface AgentStatusProps {
-  agent: any;
+  agent: Agent | undefined;
 }
 
 export function AgentStatus({ agent }: AgentStatusProps) {
   const [expanded, setExpanded] = useState(false);
+
+  if (!agent) {
+    return (
+      <div className="glass-card fade-in-up p-4 text-center text-muted">
+        No agent data available
+      </div>
+    );
+  }
 
   const getStatusClass = () => {
     switch (agent.status?.toLowerCase()) {
@@ -174,12 +185,14 @@ export function AgentStatus({ agent }: AgentStatusProps) {
           <button
             onClick={() => setExpanded(!expanded)}
             className="text-accent hover:text-accent-secondary transition-colors text-xs uppercase tracking-wider font-bold"
+            aria-expanded={expanded}
+            aria-controls={`agent-details-${agent?.id || 'unknown'}`}
           >
             {expanded ? '▼ Hide Details' : '▶ Show Details'}
           </button>
 
           {expanded && (
-            <div className="mt-3 space-y-3">
+            <div id={`agent-details-${agent?.id || 'unknown'}`} className="mt-3 space-y-3">
               {/* Custom Prompt */}
               {agent.customPrompt && (
                 <div>
@@ -236,14 +249,23 @@ export function AgentStatus({ agent }: AgentStatusProps) {
               )}
 
               {/* Action Buttons */}
-              <div className="flex space-x-2 pt-2">
-                <button className="text-accent hover:text-accent-secondary transition-colors text-xs uppercase tracking-wider font-bold">
+              <div className="flex space-x-2 pt-2" role="group" aria-label="Agent actions">
+                <button
+                  className="text-accent hover:text-accent-secondary transition-colors text-xs uppercase tracking-wider font-bold"
+                  aria-label={`Test ${agent?.name || 'agent'}`}
+                >
                   Test
                 </button>
-                <button className="text-accent hover:text-accent-secondary transition-colors text-xs uppercase tracking-wider font-bold">
+                <button
+                  className="text-accent hover:text-accent-secondary transition-colors text-xs uppercase tracking-wider font-bold"
+                  aria-label={`Start loop for ${agent?.name || 'agent'}`}
+                >
                   Start Loop
                 </button>
-                <button className="text-status-error hover:opacity-80 transition-opacity text-xs uppercase tracking-wider font-bold">
+                <button
+                  className="text-status-error hover:opacity-80 transition-opacity text-xs uppercase tracking-wider font-bold"
+                  aria-label={`Stop ${agent?.name || 'agent'}`}
+                >
                   Stop
                 </button>
               </div>

@@ -45,9 +45,7 @@ This workspace is designed for rapid prototyping, brainstorming sessions, and ma
 **Before Any Project Changes**:
 - **Check project scope**: Is this workspace-level or project-specific?
 - **Use appropriate location**:
-  - Workspace rules: `.clinerules` (this file)
-  - Project rules: `[project]/rules/`
-  - Global templates: Reference but don't duplicate
+  - Workspace rules: `~/.claude/agents/` (this file)
 - **Maintain clear boundaries**: No cross-contamination between levels
 - **Document rationale**: Why is this rule at this level?
 
@@ -106,7 +104,7 @@ This workspace is designed for rapid prototyping, brainstorming sessions, and ma
 
 ## 10. Emergency Protocols
 **When rules conflict**:
-1. **Workspace rules override**: `.clinerules` takes precedence
+1. **Workspace rules override**: `~/.claude/agents/` takes precedence
 2. **Project rules apply**: Within project boundaries
 3. **Global rules fallback**: For undefined behaviors
 4. **Document conflicts**: Update rules to prevent future issues
