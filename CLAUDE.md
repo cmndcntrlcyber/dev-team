@@ -20,7 +20,8 @@ Dev Team Platform is an AI-powered SDLC management system that combines project 
 - Alternative deployment with 6 specialized AI agent microservices
 - API Gateway (port 3000), Orchestrator (3001), Project Service (3002), Task Service (3003)
 - Agent Services: Architecture (3010), Frontend (3011), Backend (3012), QA (3013), DevOps (3014), MCP (3015)
-- Infrastructure: PostgreSQL, Redis, NATS messaging
+- Infrastructure: PostgreSQL (port 5433), Redis, NATS messaging
+- Shared packages: `@dev-team-platform/types`, `@dev-team-platform/claude-code-agent`
 
 ## Common Commands
 
@@ -43,6 +44,7 @@ npm run dev:build        # Build and start services
 npm run dev:logs         # View all service logs
 npm run dev:clean        # Remove all containers and volumes
 npm run setup            # Install dependencies + build shared packages
+npm run build:shared     # Build shared types and utilities
 npm run db:migrate       # Run database migrations
 npm run db:seed          # Seed sample data
 ```
@@ -64,7 +66,9 @@ dev-team/
 ├── dev-team/dev-team-platform/  # Microservices alternative
 │   ├── services/         # Core and agent microservices
 │   ├── frontend/         # React dashboard
-│   └── shared/           # Shared types across services
+│   └── shared/           # Shared types and utilities
+│       ├── types/        # @dev-team-platform/types
+│       └── claude-code-agent/  # @dev-team-platform/claude-code-agent
 ├── workflows/            # Cline integration workflows
 ├── memory-bank/          # Project patterns and learnings
 └── .clinerules/          # Workspace rules for Cline AI integration
