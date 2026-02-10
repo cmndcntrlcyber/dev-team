@@ -17,7 +17,7 @@
   "dependencies": {
     "@dev-team-platform/types": "^1.0.0",
     "@dev-team-platform/claude-code-agent": "^1.0.0",
-    "fastify": "^4.24.0",
+    "fastify": "^5.7.3",
     "@fastify/cors": "^8.4.0",
     "@fastify/helmet": "^11.1.0",
     "@fastify/rate-limit": "^8.0.0",
